@@ -11,6 +11,7 @@ export default class Game {
         this.m_Renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#Main-Canvas') });
         this.m_Renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.m_Renderer.domElement);
+        this.m_Clock = new THREE.Clock();
 
         this.StartNewScene(new StartScene(this.m_MainCamera));
     }
@@ -22,7 +23,8 @@ export default class Game {
             this.StartNewScene(this.m_CurrentScene.m_SwitchScene);
         }
 
-        this.m_CurrentScene.OnUpdate(16.0);
+        const delta = this.m_Clock.getDelta(); 
+        this.m_CurrentScene.OnUpdate(delta);
         this.m_CurrentScene.OnPreRender();
 
         this.m_Renderer.render(this.m_CurrentScene.m_Scene, this.m_MainCamera);
