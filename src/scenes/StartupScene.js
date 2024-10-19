@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+import EnemyManager from "../hostiles/EnemyManager.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -16,6 +17,7 @@ export default class StartupScene extends Scene {
     this.setupLights();
     this.setupEnvironment();
     this.setupPlayer();
+    this.EnemyManager = new EnemyManager(this.m_Scene, this.playerObject);
     this.stats = new Stats();
     document.body.appendChild(this.stats.dom);
     this.bullets = []; // Array to store active bullets
@@ -315,6 +317,7 @@ export default class StartupScene extends Scene {
     const horizontalMovement = moveDirection.multiplyScalar(this.moveSpeed);
     const verticalMovement = new THREE.Vector3(0, this.verticalVelocity, 0);
 
+    this.EnemyManager.OnUpdate(deltaTime);
     this.updatePosition(horizontalMovement, verticalMovement);
     this.checkGrounded();
     this.updateBlasterPosition();
