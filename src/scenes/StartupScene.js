@@ -20,6 +20,18 @@ export default class StartupScene extends Scene {
     document.body.appendChild(this.stats.dom);
     this.bullets = []; // Array to store active bullets
     this.loadSound(); // Load the sound file
+
+    // Environment maps / skyboxes
+    const loader = new THREE.CubeTextureLoader();
+    const texture = loader.load([
+        '/src/assets/Environment/env_maps/cloudy/bluecloud_ft.jpg', // Front face
+        '/src/assets/Environment/env_maps/cloudy/bluecloud_bk.jpg',  // Back face
+        '/src/assets/Environment/env_maps/cloudy/bluecloud_up.jpg', // Top face
+        '/src/assets/Environment/env_maps/cloudy/bluecloud_dn.jpg', // Bottom face
+        '/src/assets/Environment/env_maps/cloudy/bluecloud_rt.jpg', // Right face
+        '/src/assets/Environment/env_maps/cloudy/bluecloud_lf.jpg', // Left face
+    ]);
+    this.m_Scene.background = texture;
   }
 
   initializeScene(camera, renderer) {
