@@ -17,7 +17,7 @@ export default class StartupScene extends Scene {
     this.setupLights();
     this.setupEnvironment();
     this.setupPlayer();
-    this.EnemyManager = new EnemyManager(this.m_Scene, this.playerObject);
+    this.EnemyManager = new EnemyManager(this.m_Scene, this.playerObject, this.collidableMeshList);
     this.stats = new Stats();
     document.body.appendChild(this.stats.dom);
     this.bullets = []; // Array to store active bullets

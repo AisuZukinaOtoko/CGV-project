@@ -1,17 +1,23 @@
 import SuperZombie from "./SuperZombie";
+import * as THREE from 'three';
 
 
 export default class EnemyManager {
-    constructor(scene, player){
+    constructor(scene, player, collidableMeshList){
         this.scene = scene;
         this.player = player;
  
-        this.zombieNum = 20;
+        this.zombieNum = 2;
         this.SuperZombies = [];
+        this.collidableMeshList = collidableMeshList; // Pass the collidable objects
 
-        for (let i = 0; i < this.zombieNum; i++){
-            this.SuperZombies.push(new SuperZombie(this.scene));
-            
+        for (let i = 0; i < this.zombieNum; i++) {
+            const initialPosition = new THREE.Vector3(2 * i, 0, 5); // Stagger along x-axis
+            const zombie = new SuperZombie(this.scene, this.collidableMeshList,initialPosition);
+
+            // Set initial position for each zombie
+            this.SuperZombies.push(zombie);
+
             console.log("Zombie added");
         }
     }
@@ -21,7 +27,7 @@ export default class EnemyManager {
         for (const zombie of this.SuperZombies){
             if (zombie.SetupComplete){
                 zombie.OnUpdate(deltaTime);
-                this.SuperZombies[i].mesh.position.set(2 * i, 0, 5);
+               
                 //zombie.mesh.position.z -= 0.005;
 
                 //console.log(zombie.position);
