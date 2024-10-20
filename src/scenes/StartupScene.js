@@ -18,10 +18,25 @@ export default class StartupScene extends Scene {
     this.setupEnvironment();
     this.setupPlayer();
     this.EnemyManager = new EnemyManager(this.m_Scene, this.playerObject, this.collidableMeshList);
+    this.paused = false;
     this.stats = new Stats();
     document.body.appendChild(this.stats.dom);
     this.bullets = []; // Array to store active bullets
     this.loadSound(); // Load the sound file
+
+    // ---- START --> Block of code starting from 28-36 handle the pause, they pause the zombies animation, and the bullets
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          this.paused = true; // Toggle pause state when ESC is pressed
+        }
+      });
+
+      document.getElementById("start-button").addEventListener("click", () => {
+        this.paused = false;
+      });
+
+    // ---- END
 
     // Environment maps / skyboxes
     const loader = new THREE.CubeTextureLoader();
@@ -35,6 +50,7 @@ export default class StartupScene extends Scene {
     ]);
     this.m_Scene.background = texture;
   }
+
 
   initializeScene(camera, renderer) {
     this.m_MainCamera = camera;
@@ -208,12 +224,15 @@ export default class StartupScene extends Scene {
   }
 
   handleMouseClick(event) {
-    if (document.pointerLockElement === this.m_Renderer.domElement) {
+    if (!this.paused && document.pointerLockElement === this.m_Renderer.domElement) {
       this.fireBullet();
     }
   }
 
   fireBullet() {
+    if (this.paused) {
+      return; // Prevent firing bullets when paused
+    }
     if (this.foamBulletModel) {
       const bullet = this.foamBulletModel.clone();
 
@@ -261,7 +280,7 @@ export default class StartupScene extends Scene {
   }
 
   handleMouseMove(event) {
-    if (document.pointerLockElement === this.m_Renderer.domElement) {
+    if (!this.paused && document.pointerLockElement === this.m_Renderer.domElement) {
       this.rotationY -= event.movementX * this.mouseSensitivity;
       this.rotationX = Math.max(
         -Math.PI / 2,
@@ -297,8 +316,16 @@ export default class StartupScene extends Scene {
     return false;
   }
 
+
   OnUpdate(deltaTime) {
     this.stats.update();
+
+    if (this.paused) {
+      deltaTime = 0; // Set deltaTime to 0 when paused
+      return;
+    }
+
+
     let moveDirection = this.getMovementDirection();
 
     if (EVENTS.eventHandler.IsKeyPressed(EVENTS.KEY.SPACE) && this.isGrounded) {
@@ -317,11 +344,12 @@ export default class StartupScene extends Scene {
     const horizontalMovement = moveDirection.multiplyScalar(this.moveSpeed);
     const verticalMovement = new THREE.Vector3(0, this.verticalVelocity, 0);
 
+
     this.EnemyManager.OnUpdate(deltaTime);
+    this.updateBullets(deltaTime);
     this.updatePosition(horizontalMovement, verticalMovement);
     this.checkGrounded();
     this.updateBlasterPosition();
-    this.updateBullets(deltaTime);
   }
 
   updateBullets(deltaTime) {
