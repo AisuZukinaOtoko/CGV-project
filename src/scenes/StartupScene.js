@@ -64,7 +64,7 @@ export default class StartupScene extends Scene {
   setupEnvironment() {
     this.collidableMeshList = [];
     new GLTFLoader().load(
-      "src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene.gltf",
+      "src/assets/Environment/polygonal_apocalyptic_urban_ruins/untitled.glb",
       (gltf) => {
         const environment = gltf.scene;
         environment.scale.set(1, 1, 1);
