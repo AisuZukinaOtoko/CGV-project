@@ -1,9 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&display=swap');
 
 body,
-html,
-#Main-Canvas {
+html {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+#Main-Canvas {
+  display: block;
   width: 100%;
   height: 100%;
 }
