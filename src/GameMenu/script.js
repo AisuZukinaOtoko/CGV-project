@@ -2,13 +2,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const intro = document.getElementById("intro");
     const startButton = document.getElementById("start-button");
     const exitButton = document.getElementById("exit-button");
+    const menuSound = document.getElementById('menu-sound'); // Reference to the audio element
     let gameModule = null; // Store the imported module
     let isGamePaused = false; // Track the pause state
     let gameStarted = false; // Track if the game has been started at least once
 
+    // Function to play menu sound
+    function playIntroSound() {
+        if (menuSound) {
+            menuSound.play();
+            console.log("Menu sound playing...");
+        }
+    }
+
+    // Function to stop menu sound
+    function stopIntroSound() {
+        if (menuSound) {
+            menuSound.pause();
+            menuSound.currentTime = 0; // Reset sound to the beginning when stopped
+            console.log("Menu sound stopped.");
+        }
+    }
+
     // Function to start or resume the game
     function startGame() {
-        intro.style.display = "none";
+        intro.style.display = "none"; // Hide intro screen
+        stopIntroSound(); // Stop the menu sound when the game starts
 
         if (isGamePaused && gameModule) {
             // Resume the game if it's paused
@@ -21,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 gameModule = module;
                 gameStarted = true;
                 console.log("Game script loaded!");
-                // Call the start function if available
                 if (gameModule.startGame) {
                     gameModule.startGame();
                 }
@@ -35,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to show the intro screen and pause the game
     function showIntro() {
         intro.style.display = "flex";
+        playIntroSound(); // Play sound when showing the intro or pause menu
         if (gameModule && !isGamePaused) {
             gameModule.pauseGame();
             isGamePaused = true;
@@ -44,12 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Function to exit the game
     function exitGame() {
-        // alert('Exiting the game...');
         intro.style.display = "flex";
-        // isGamePaused = false;
-        // gameStarted = false;
+        stopIntroSound(); // Optionally stop sound when exiting
         console.log("Game exited and reset.");
-        // Add any other logic to reset the game state here, if needed.
         window.close();
     }
 
@@ -69,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     });
+
+    // Play sound initially when the DOM content is loaded (for the intro screen)
+    playIntroSound();
 });
-
-
