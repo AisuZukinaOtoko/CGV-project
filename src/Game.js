@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import StartScene from "./scenes/StartupScene.js";
+import StartScene from "./scenes/setup/StartupScene.js";
 
 export default class Game {
   constructor() {
