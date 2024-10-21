@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&display=swap');
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+#Main-Canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  z-index: 999; /* Ensure it's on top of everything */
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+#intro.hidden {
+  display: none; /* Hide the overlay when not needed */
+}
+
+#exit-button {
+  margin-top: 10px;
+}
+
+.health-bar {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: fixed;
+  bottom: 40px;
+  left:40px;
+  width: 300px;
+  width: 15.5%;
+  height: 30px;
+  padding: 5px;
+  background: #ddd;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  position: fixed;
+}
+.bar {
+  background: #c54;
+  width: 100%;
+  height: 20px;
+  
+
+  transition: width .5s linear;
+}
+
+.hit {
+  background: rgba(255,255,255,0.6);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 0px;
+  
+  transition: width .5s linear;
+}
+
+#gun-icon {
+  bottom: 40px;
+  left:90%;
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+  background-image: url('src/assets/icons/icon-gun.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: fixed;
+}
+#ammo-count {
+  color: #ddd;
+  bottom: 20px;
+  left: 90%;
+  font-size: 24px;
+  font-weight: bold;
+  position: fixed;
+}
+
+/* Timer and kill counter */
+#game-ui {
+  position: absolute;
+  top: 80px;
+  left: 40px;
+  color: #c54;
+  font-family: 'Agdasima', sans-serif;
+}
+
+#timer {
+  font-size: 350%;
+  margin: 0;
+}
+
+#kill-counter {
+  font-size: 200%;
+  margin: 0;
+}
+
+/* Game-over screen */
+#game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  font-family: 'Agdasima', sans-serif;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+#restart-button {
+  font-size: 24px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  cursor: pointer;
+  font-family: 'Agdasima', sans-serif;
+
+}

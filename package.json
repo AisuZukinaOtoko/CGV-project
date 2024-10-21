@@ -1,0 +1,22 @@
+{
+  "name": "game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "live-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cannon": "^0.6.2",
+    "three": "^0.168.0",
+    "three-mesh-bvh": "^0.8.2",
+    "yuka": "^0.7.8"
+  },
+  "devDependencies": {
+    "vite": "^5.4.9"
+  }
+}
