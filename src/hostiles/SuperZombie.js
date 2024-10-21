@@ -22,9 +22,9 @@ export default class SuperZombie extends Zombie {
                 this.mesh = gltf.scene;
                 this.mesh.scale.set(1.2, 1.2, 1.2); // Adjust the scale if needed
                 this.mesh.position.copy(initialPosition);
-                //scene.add(this.zombie); // Make sure 'scene' is defined or passed to the class
-                this.speed = 0.05; // Or any appropriate speed value
+                this.speed = 0.5; // Or any appropriate speed value
 
+                this.rootBone = this.mesh.getObjectByName('mixamorigHips'); // get the hip bone which is the root of the skeleton
 
                 // Set up the bounding box
                 this.boundingBox = new THREE.Box3().setFromObject(this.mesh);
@@ -40,6 +40,7 @@ export default class SuperZombie extends Zombie {
                 this.dieForwardAction = this.mixer.clipAction(gltf.animations[6]);
                 this.dieBackAction = this.mixer.clipAction(gltf.animations[10]);
                 this.runAction = this.mixer.clipAction(gltf.animations[8]);
+
 
                 // Optionally, play an animation
                 this.ResetAllActions();
@@ -62,17 +63,25 @@ export default class SuperZombie extends Zombie {
             this.mixer.update(deltaTime); // Update the animation mixer with delta time
         }
 
-        // If the zombie is running, move it forward
-        if (this.isRunning && !this.checkCollisionWithWalls()) {
-            this.mesh.position.z -= this.speed * deltaTime; // Move forward if no collision
-        }
-       
+        this.mesh.rotation.y += 0.01;
+        this.state = Zombie.IDLE;
+        this.stateMachine.update();
+        //const forward = new THREE.Vector3(0, 0, -1); // Z-axis as forward
+        //forward.applyQuaternion(this.mesh.quaternion); // Apply rotation
+        //forward.multiplyScalar(deltaTime * 2); // Adjust speed here
+        //this.mesh.position.add(forward);
 
+        // If the zombie is running, move it forward
+        //if (this.isRunning && !this.checkCollisionWithWalls()) {
+        //    this.mesh.position.z -= this.speed * deltaTime; // Move forward if no collision
+        //}
+        //this.mesh.position.z -= this.speed * deltaTime;
+        //this.ZombieMovement();
 
         // Update the bounding box to match the zombie's position
-        if (this.boundingBox) {
-            this.boundingBox.setFromObject(this.mesh);
-        }
+        //if (this.boundingBox) {
+        //    this.boundingBox.setFromObject(this.mesh);
+        //}
     }
 
 
@@ -83,22 +92,35 @@ export default class SuperZombie extends Zombie {
         return false;
     }
 
-    // Collision check with walls or other rigid objects
-    checkCollisionWithWalls() {
-        // Update bounding box to current position
-        this.boundingBox.setFromObject(this.mesh);
-
-        // Loop through all walls and check for intersections
-        for (const wall of this.collidableMeshList) {
-            const wallBoundingBox = new THREE.Box3().setFromObject(wall);
-            if (this.boundingBox.intersectsBox(wallBoundingBox)) {
-                console.log('Zombie collided with a wall');
-                return true; // Collision detected
-            }
+    ZombieMovement(){        
+        if (this.rootBone) {
+            const rootPosition = new THREE.Vector3();
+            this.rootBone.getWorldPosition(rootPosition);
+            //const posDelta = rootPosition.clone().sub(this.mesh.position);
+            //const posDelta = this.mesh.position.clone().sub(rootPosition);
+            //rootPosition.multiplyScalar(0.6);
+            this.mesh.position.copy(rootPosition);
+            console.log(this.mesh.position);
         }
-
-        return false; // No collision
     }
+
+    // Collision check with walls or other rigid objects
+    // checkCollisionWithWalls() {
+    //     // Update bounding box to current position
+    //     this.boundingBox.setFromObject(this.mesh);
+
+    //     // Loop through all walls and check for intersections
+    //     for (const wall of this.collidableMeshList) {
+    //         const wallBoundingBox = new THREE.Box3().setFromObject(wall);
+    //         if (this.boundingBox.intersectsBox(wallBoundingBox)) {
+    //             console.log('Zombie collided with a wall');
+    //             return true; // Collision detected
+    //         }
+    //     }
+
+    //     return false; // No collision
+    // }
+
     ResetAllActions() {
         this.idleAction.stop();
         this.screamAction.stop();
