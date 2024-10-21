@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&display=swap');
+
 body,
 html,
 #Main-Canvas {
@@ -61,4 +63,45 @@ html,
   font-size: 24px;
   font-weight: bold;
   position: fixed;
+}
+
+/* Timer and kill counter */
+#game-ui {
+  position: absolute;
+  top: 80px;
+  left: 40px;
+  color: #c54;
+  font-family: 'Agdasima', sans-serif;
+}
+
+#timer {
+  font-size: 350%;
+  margin: 0;
+}
+
+#kill-counter {
+  font-size: 200%;
+  margin: 0;
+}
+
+/* Game-over screen */
+#game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  font-family: 'Agdasima', sans-serif;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+#restart-button {
+  font-size: 24px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  cursor: pointer;
+  font-family: 'Agdasima', sans-serif;
 }
