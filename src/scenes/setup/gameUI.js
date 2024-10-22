@@ -26,7 +26,7 @@ export class GameUI {
         this.updateTimerDisplay();
         if (this.timeRemaining <= 0) {
           this.stopTimer();
-          this.gameOver();
+        //   this.gameOver();
         }
       }, 1000);
     }
