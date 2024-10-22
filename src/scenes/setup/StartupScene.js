@@ -48,18 +48,27 @@ export default class StartupScene extends Scene {
     this.collisionManager = new CollisionManager(this.m_Scene);
     this.collisionManager.collidableMeshList =
       this.environmentManager.collidableMeshList;
+
+    // Create PlayerManager first
     this.playerManager = new PlayerManager(
       this.m_Scene,
       this.m_MainCamera,
       this.collisionManager,
       this.m_Renderer
     );
+
+    // Create GunManager, passing the PlayerManager instance
     this.gunManager = new GunManager(
       this.m_Scene,
       this.m_MainCamera,
       this.playerManager.playerObject,
-      this.collisionManager
+      this.collisionManager,
+      this.playerManager // Pass the PlayerManager instance
     );
+
+    // Set the GunManager in PlayerManager
+    this.playerManager.setGunManager(this.gunManager);
+
     this.enemyManager = new EnemyManager(
       this.m_Scene,
       this.playerManager.playerObject,
@@ -104,7 +113,7 @@ export default class StartupScene extends Scene {
   handleMouseMove(event) {
     this.playerManager.handleMouseMove(event);
   }
-  
+
   onZombieKilled() {
     this.gameUI.incrementKills();
   }
@@ -115,5 +124,6 @@ export default class StartupScene extends Scene {
     this.playerManager.update(deltaTime);
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
+    this.gunManager.update();
   }
 }

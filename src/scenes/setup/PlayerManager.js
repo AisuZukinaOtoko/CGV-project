@@ -9,6 +9,8 @@ export class PlayerManager {
     this.renderer = renderer;
     this.setupPlayer();
     this.setupCrosshair();
+    this.gunManager = null;
+    this.setupEventListeners();
   }
 
   setupPlayer() {
@@ -28,6 +30,20 @@ export class PlayerManager {
     this.playerHeight = 2;
     this.playerRadius = 0.5;
     this.raycaster = new THREE.Raycaster();
+  }
+
+  setGunManager(gunManager) {
+    this.gunManager = gunManager;
+  }
+
+  setupEventListeners() {
+    document.addEventListener("keydown", this.handleKeyDown.bind(this));
+  }
+
+  handleKeyDown(event) {
+    if (event.key === "p") {
+      this.gunManager.toggleModel();
+    }
   }
 
   handleMouseMove(event) {
@@ -144,5 +160,22 @@ export class PlayerManager {
     this.crosshair.renderOrder = 999;
 
     this.camera.add(this.crosshair);
+  }
+
+  adjustCameraPosition(isBlasterVisible) {
+    if (isBlasterVisible) {
+      this.camera.position.set(0, 0, 0);
+    } else {
+      // Elevate the camera when the player model is visible
+      this.camera.position.set(0, 0.7, 0); // Adjust this value as needed
+    }
+  }
+
+  updateCrosshairPosition() {
+    if (this.gunManager && this.gunManager.isBlasterVisible) {
+      this.crosshair.position.set(0.01, -0.01, -1);
+    } else {
+      this.crosshair.position.set(-0.005, -0.02, -1);
+    }
   }
 }

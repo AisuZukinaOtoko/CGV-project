@@ -2,34 +2,52 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 export class GunManager {
-  constructor(scene, camera, playerObject, collisionManager) {
+  constructor(scene, camera, playerObject, collisionManager, playerManager) {
     this.scene = scene;
     this.camera = camera;
     this.bullets = [];
     this.playerObject = playerObject;
     this.collisionManager = collisionManager;
-    this.bullets = [];
-    this.setupGun();
-    this.loadSound();
-    this.updateBlasterPosition();
-  }
-
-  setupGun() {
+    this.playerManager = playerManager;
     this.blasterObject = new THREE.Object3D();
+    this.playerModelObject = new THREE.Object3D();
+    this.blasterBulletScale = 6;
+    this.playerModelBulletScale = 4;
     this.camera.add(this.blasterObject);
-    this.loadPlayerModel();
+    this.camera.add(this.playerModelObject);
+    this.blasterVolume = 0.1;
+    this.isBlasterVisible = true;
+    this.loadModels();
+    this.loadSound();
+    this.updateModelPosition();
+    this.blasterZoom = 1;
+    this.playerModelZoom = 0.8;
+    this.currentZoom = this.blasterZoom;
   }
 
-  loadPlayerModel() {
+  loadModels() {
     const loader = new GLTFLoader();
     loader.load(
       "src/assets/Weapon/kenney_blaster-kit/Models/blasterG.glb",
       (gltf) => {
-        this.gltfModel = gltf.scene;
-        this.gltfModel.scale.set(1, 1, 1);
-        this.blasterObject.add(this.gltfModel);
-        this.updateBlasterPosition();
+        this.blasterModel = gltf.scene;
+        this.blasterModel.scale.set(1, 1, 1);
+        this.blasterObject.add(this.blasterModel);
+        this.updateModelPosition();
         this.loadFoamBullet();
+      },
+      undefined,
+      (error) => console.error("Error loading blaster model:", error)
+    );
+
+    loader.load(
+      "src/assets/player/final.glb",
+      (gltf) => {
+        this.playerModel = gltf.scene;
+        this.playerModel.scale.set(1, 1, 1);
+        this.playerModelObject.add(this.playerModel);
+        this.playerModelObject.visible = false;
+        this.updateModelPosition();
       },
       undefined,
       (error) => console.error("Error loading player model:", error)
@@ -63,17 +81,33 @@ export class GunManager {
       .catch((error) => console.error("Error loading sound:", error));
   }
 
+  setBlasterVolume(volume) {
+    // Ensure volume is between 0 and 1
+    this.blasterVolume = Math.max(0, Math.min(1, volume));
+  }
+
   fireBullet() {
     if (this.foamBulletModel) {
       const bullet = this.foamBulletModel.clone();
 
-      const blasterWorldPosition = new THREE.Vector3();
-      this.blasterObject.getWorldPosition(blasterWorldPosition);
+      const bulletStartPosition = new THREE.Vector3();
+      const bulletOffset = new THREE.Vector3();
 
-      bullet.position.copy(blasterWorldPosition);
+      if (this.isBlasterVisible) {
+        bulletOffset.set(0.4, -0.3, -1.2); // Blaster position
+      } else {
+        bulletOffset.set(-0.2, -0.3, -1); // Player model position
+      }
+
+      // Apply the offset in the camera's local space
+      bulletStartPosition
+        .copy(bulletOffset)
+        .applyMatrix4(this.camera.matrixWorld);
+
+      bullet.position.copy(bulletStartPosition);
 
       const direction = new THREE.Vector3();
-      this.camera.getWorldDirection(direction); // Use this.camera instead of this.m_MainCamera
+      this.camera.getWorldDirection(direction);
 
       bullet.quaternion.setFromUnitVectors(
         new THREE.Vector3(0, 1, 0),
@@ -90,17 +124,43 @@ export class GunManager {
       bullet.bounceCount = 0;
       bullet.maxBounces = 3;
 
+      if (this.isBlasterVisible) {
+        bullet.scale.set(
+          this.blasterBulletScale,
+          this.blasterBulletScale,
+          this.blasterBulletScale
+        );
+      } else {
+        bullet.scale.set(
+          this.playerModelBulletScale,
+          this.playerModelBulletScale,
+          this.playerModelBulletScale
+        );
+      }
+
       this.scene.add(bullet);
       this.bullets.push(bullet);
 
       if (this.blasterSound) {
         const source = this.audioContext.createBufferSource();
         source.buffer = this.blasterSound;
-        source.connect(this.audioContext.destination);
+
+        // Create a gain node for volume control
+        const gainNode = this.audioContext.createGain();
+        gainNode.gain.setValueAtTime(
+          this.blasterVolume,
+          this.audioContext.currentTime
+        );
+
+        // Connect the source to the gain node, then to the destination
+        source.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
         source.start();
       }
     }
   }
+
   updateBullets(deltaTime) {
     const gravity = new THREE.Vector3(0, -9.8, 0);
 
@@ -163,5 +223,51 @@ export class GunManager {
       this.blasterObject.position.set(0.4, -0.3, -1.2);
       this.blasterObject.rotation.set(0, Math.PI, 0);
     }
+  }
+
+  updateModelPosition() {
+    if (this.blasterObject) {
+      this.blasterObject.position.set(0.4, -0.3, -1.2);
+      this.blasterObject.rotation.set(0, Math.PI, 0);
+    }
+    if (this.playerModelObject) {
+      this.playerModelObject.position.set(-0.43, -1.8, -1.2);
+      this.playerModelObject.rotation.set(0, Math.PI, 0);
+    }
+  }
+
+  toggleModel() {
+    this.isBlasterVisible = !this.isBlasterVisible;
+    this.blasterObject.visible = this.isBlasterVisible;
+    this.playerModelObject.visible = !this.isBlasterVisible;
+
+    // Update zoom
+    this.currentZoom = this.isBlasterVisible
+      ? this.blasterZoom
+      : this.playerModelZoom;
+    this.updateCameraZoom();
+
+    // Update crosshair position
+    if (this.playerManager) {
+      this.playerManager.updateCrosshairPosition(this.isBlasterVisible);
+      this.playerManager.adjustCameraPosition(this.isBlasterVisible);
+    }
+  }
+
+  updateCameraZoom() {
+    this.camera.zoom = this.currentZoom;
+    this.camera.updateProjectionMatrix();
+  }
+
+  setBlasterBulletScale(scale) {
+    this.blasterBulletScale = scale;
+  }
+
+  setPlayerModelBulletScale(scale) {
+    this.playerModelBulletScale = scale;
+  }
+
+  update() {
+    this.updateCameraZoom();
   }
 }

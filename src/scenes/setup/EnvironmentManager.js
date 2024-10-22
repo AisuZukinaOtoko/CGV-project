@@ -13,7 +13,7 @@ export class EnvironmentManager {
 
   setupEnvironment() {
     new GLTFLoader().load(
-      "src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene.gltf",
+      "src/assets/Environment/polygonal_apocalyptic_urban_ruins/flat-scene.glb",
       (gltf) => {
         const environment = gltf.scene;
         environment.scale.set(1, 1, 1);
