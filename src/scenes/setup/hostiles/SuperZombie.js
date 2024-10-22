@@ -1,19 +1,17 @@
 import * as THREE from "three";
 import Zombie from "./ZombieBase";
+import { IDLE, WALKING, AGGRAVATED, ATTACK, INJURED, STARTLED, DEAD } from './ZombieBase';
+import { GameEntity, State, StateMachine, Vector3 } from 'yuka';
+import { InitState, IdleState, WalkingState, AggravatedState, AttackState, InjuredState, StartledState, DeadState } from './SuperZombieStates'
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
+
 export default class SuperZombie extends Zombie {
-  constructor(
-    scene,
-    collisionManager,
-    initialPosition = new THREE.Vector3(0, 20, 20)
-  ) {
-    super();
-    if (
-      !collisionManager ||
-      typeof collisionManager.addCollidableObject !== "function" ||
-      typeof collisionManager.checkCollision !== "function"
-    ) {
+  constructor(scene, collisionManager, initialPosition = new THREE.Vector3(0, 20, 20), playerPosition) {
+    super(playerPosition);
+
+    if (!collisionManager || typeof collisionManager.addCollidableObject !== "function" ||
+      typeof collisionManager.checkCollision !== "function" ) {
       console.error("Invalid collisionManager provided to SuperZombie");
     }
 
@@ -33,6 +31,19 @@ export default class SuperZombie extends Zombie {
     this.collisionManager = collisionManager;
     this.speed = 0.5;
     this.movementVector = new THREE.Vector3(0, 0, 1);
+    this.deltaTime = null;
+    this.PlayerDamage = 0;
+
+    // zombie state setup
+    this.stateMachine.add(10000, new InitState());
+    this.stateMachine.add(IDLE, new IdleState());
+    this.stateMachine.add(WALKING, new WalkingState());
+    this.stateMachine.add(AGGRAVATED, new AggravatedState());
+    this.stateMachine.add(ATTACK, new AttackState());
+    this.stateMachine.add(INJURED, new InjuredState());
+    this.stateMachine.add(STARTLED, new StartledState());
+    this.stateMachine.add(DEAD, new DeadState());
+    this.stateMachine.changeTo(10000);
 
     // Load the zombie model and animations
     const loader = new GLTFLoader();
@@ -52,6 +63,8 @@ export default class SuperZombie extends Zombie {
         scene.add(this.mesh);
         this.SetupComplete = true;
         this.isRunning = true;
+        
+        
       },
       undefined,
       (error) => {
@@ -131,33 +144,37 @@ export default class SuperZombie extends Zombie {
     this.mixer = new THREE.AnimationMixer(this.mesh);
 
     // Define animations
-    this.idleAction = this.mixer.clipAction(gltf.animations[11]);
-    this.screamAction = this.mixer.clipAction(gltf.animations[1]);
-    this.attackAction = this.mixer.clipAction(gltf.animations[3]);
-    this.crawlAction = this.mixer.clipAction(gltf.animations[5]);
-    this.dieForwardAction = this.mixer.clipAction(gltf.animations[6]);
-    this.dieBackAction = this.mixer.clipAction(gltf.animations[10]);
-    this.runAction = this.mixer.clipAction(gltf.animations[8]);
+    this.dieBackAction = this.mixer.clipAction(gltf.animations[0]);
+    this.crawlAction = this.mixer.clipAction(gltf.animations[1]);
+    this.dieForwardAction = this.mixer.clipAction(gltf.animations[2]);
+    this.hurtCrawlAction = this.mixer.clipAction(gltf.animations[3]);
+    this.attackAction = this.mixer.clipAction(gltf.animations[4]);
+    this.runAction = this.mixer.clipAction(gltf.animations[5]);
+    this.idleAction = this.mixer.clipAction(gltf.animations[6]);
+    //this.screamAction = this.mixer.clipAction(gltf.animations[1]);
 
     // Adjust run animation speed to match desired movement speed
-    const runSpeed = this.speed / this.movementVector.length();
-    this.runAction.setEffectiveTimeScale(runSpeed);
+    //const runSpeed = this.speed / this.movementVector.length();
+    //this.runAction.setEffectiveTimeScale(runSpeed);
 
     this.ResetAllActions();
     this.runAction.play();
   }
 
   OnUpdate(deltaTime) {
+    this.deltaTime = deltaTime;
     if (this.mixer) {
       this.mixer.update(deltaTime);
     }
+    
+    this.stateMachine.update();
 
-    if (this.isRunning && !this.checkCollision()) {
-      const movement = this.movementVector
-        .clone()
-        .multiplyScalar(this.speed * deltaTime);
-      this.mesh.position.add(movement);
-    }
+    // if (this.isRunning && !this.checkCollision()) {
+    //   const movement = this.movementVector
+    //     .clone()
+    //     .multiplyScalar(this.speed * deltaTime);
+    //   this.mesh.position.add(movement);
+    // }
   }
 
   checkCollision() {
@@ -189,7 +206,8 @@ export default class SuperZombie extends Zombie {
 
   ResetAllActions() {
     this.idleAction.stop();
-    this.screamAction.stop();
+    //this.screamAction.stop();
+    this.hurtCrawlAction.stop();
     this.attackAction.stop();
     this.crawlAction.stop();
     this.dieForwardAction.stop();

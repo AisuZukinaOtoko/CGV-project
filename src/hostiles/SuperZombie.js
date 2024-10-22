@@ -66,6 +66,7 @@ export default class SuperZombie extends Zombie {
         this.mesh.rotation.y += 0.01;
         this.state = Zombie.IDLE;
         this.stateMachine.update();
+        console.log("Yea");
         //const forward = new THREE.Vector3(0, 0, -1); // Z-axis as forward
         //forward.applyQuaternion(this.mesh.quaternion); // Apply rotation
         //forward.multiplyScalar(deltaTime * 2); // Adjust speed here

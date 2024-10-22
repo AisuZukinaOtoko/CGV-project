@@ -149,7 +149,6 @@ class EventManager {
 
     canvas.requestPointerLock();
     event.preventDefault();
-    console.log(event.button);
 
     this.m_MouseButtons[MOUSE.ANY].m_Value = true;
     this.m_MouseButtons[event.button].m_Value = true;
