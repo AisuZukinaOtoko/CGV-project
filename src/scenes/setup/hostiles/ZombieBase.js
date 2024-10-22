@@ -38,11 +38,12 @@ export default class Zombie extends GameEntity {
 
       // Calculate the target angle using Math.atan2
       const targetYAngle = Math.atan2(targetDirection.x, targetDirection.z); // Assuming forward is along the Z-axis
+      this.mesh.rotation.y = targetYAngle;
 
       // Smoothly interpolate the mesh's Y rotation towards the target angle
       //this.mesh.rotation.y += THREE.MathUtils.euclideanDistance(this.mesh.rotation.y, targetYAngle) * this.speed * this.deltaTime * 5;
-      const difference = this.mesh.rotation.y - targetYAngle
-      this.mesh.rotation.y += (difference / Math.abs(difference)) * this.speed * this.deltaTime;
+      //const difference = this.mesh.rotation.y - targetYAngle
+      //this.mesh.rotation.y += (difference / Math.abs(difference)) * this.speed * this.deltaTime;
       //this.mesh.rotation.y = THREE.MathUtils.lerpAngle(this.mesh.rotation.y, targetYAngle, this.speed * this.deltaTime * 5);
 
       // const meshPosition = this.mesh.position.clone();
