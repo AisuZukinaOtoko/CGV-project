@@ -9,12 +9,14 @@ import { CollisionManager } from "./CollisionManager.js";
 import { PlayerManager } from "./PlayerManager.js";
 import { EnvironmentManager } from "./EnvironmentManager.js";
 import { GunManager } from "./GunManager.js";
+import { GameUI } from "./gameUI.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 export default class StartupScene extends Scene {
   constructor(camera, renderer) {
     super(camera);
+    this.gameUI = new GameUI(this);
     this.m_Scene = new THREE.Scene();
     this.m_MainCamera = camera;
     this.m_Renderer = renderer;
@@ -46,18 +48,27 @@ export default class StartupScene extends Scene {
     this.collisionManager = new CollisionManager(this.m_Scene);
     this.collisionManager.collidableMeshList =
       this.environmentManager.collidableMeshList;
+
+    // Create PlayerManager first
     this.playerManager = new PlayerManager(
       this.m_Scene,
       this.m_MainCamera,
       this.collisionManager,
       this.m_Renderer
     );
+
+    // Create GunManager, passing the PlayerManager instance
     this.gunManager = new GunManager(
       this.m_Scene,
       this.m_MainCamera,
       this.playerManager.playerObject,
-      this.collisionManager
+      this.collisionManager,
+      this.playerManager // Pass the PlayerManager instance
     );
+
+    // Set the GunManager in PlayerManager
+    this.playerManager.setGunManager(this.gunManager);
+
     this.enemyManager = new EnemyManager(
       this.m_Scene,
       this.playerManager.playerObject,
@@ -103,10 +114,16 @@ export default class StartupScene extends Scene {
     this.playerManager.handleMouseMove(event);
   }
 
+  onZombieKilled() {
+    this.gameUI.incrementKills();
+  }
+
   OnUpdate(deltaTime) {
     this.stats.update();
+    this.gameUI.update();
     this.playerManager.update(deltaTime);
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
+    this.gunManager.update();
   }
 }

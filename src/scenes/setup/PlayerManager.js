@@ -9,6 +9,8 @@ export class PlayerManager {
     this.renderer = renderer;
     this.setupPlayer();
     this.setupCrosshair();
+    this.gunManager = null;
+    this.setupEventListeners();
   }
 
   setupPlayer() {
@@ -22,12 +24,26 @@ export class PlayerManager {
     this.mouseSensitivity = 0.002;
     this.verticalVelocity = 0;
     this.isGrounded = true;
-    this.jumpStrength = 0.3;
-    this.gravity = 0.015;
-    this.moveSpeed = 0.1;
+    this.jumpStrength = 12;
+    this.gravity = 0.55;
+    this.moveSpeed = 8;
     this.playerHeight = 2;
     this.playerRadius = 0.5;
     this.raycaster = new THREE.Raycaster();
+  }
+
+  setGunManager(gunManager) {
+    this.gunManager = gunManager;
+  }
+
+  setupEventListeners() {
+    document.addEventListener("keydown", this.handleKeyDown.bind(this));
+  }
+
+  handleKeyDown(event) {
+    if (event.key === "p") {
+      this.gunManager.toggleModel();
+    }
   }
 
   handleMouseMove(event) {
@@ -77,30 +93,18 @@ export class PlayerManager {
     const horizontalMovement = moveDirection.multiplyScalar(this.moveSpeed);
     const verticalMovement = new THREE.Vector3(0, this.verticalVelocity, 0);
 
-    this.updatePosition(horizontalMovement, verticalMovement);
+    this.updatePosition(horizontalMovement, verticalMovement, deltaTime);
     this.checkGrounded();
   }
 
-  updatePosition(horizontalMovement, verticalMovement) {
-    let newPosition = this.playerObject.position
-      .clone()
-      .add(horizontalMovement);
-    if (
-      !this.collisionManager.checkCollision(
-        newPosition,
-        this.playerObject.quaternion
-      )
-    ) {
+  updatePosition(horizontalMovement, verticalMovement, deltaTime) {
+    let newPosition = this.playerObject.position.clone().add(horizontalMovement.multiplyScalar(deltaTime));
+    if (!this.collisionManager.checkCollision(newPosition, this.playerObject.quaternion)) {
       this.playerObject.position.copy(newPosition);
     }
 
-    newPosition = this.playerObject.position.clone().add(verticalMovement);
-    if (
-      !this.collisionManager.checkCollision(
-        newPosition,
-        this.playerObject.quaternion
-      )
-    ) {
+    newPosition = this.playerObject.position.clone().add(verticalMovement.multiplyScalar(deltaTime));
+    if (!this.collisionManager.checkCollision(newPosition, this.playerObject.quaternion)) {
       this.playerObject.position.copy(newPosition);
     } else {
       this.verticalVelocity = 0;
@@ -144,5 +148,22 @@ export class PlayerManager {
     this.crosshair.renderOrder = 999;
 
     this.camera.add(this.crosshair);
+  }
+
+  adjustCameraPosition(isBlasterVisible) {
+    if (isBlasterVisible) {
+      this.camera.position.set(0, 0, 0);
+    } else {
+      // Elevate the camera when the player model is visible
+      this.camera.position.set(0, 0.7, 0); // Adjust this value as needed
+    }
+  }
+
+  updateCrosshairPosition() {
+    if (this.gunManager && this.gunManager.isBlasterVisible) {
+      this.crosshair.position.set(0.01, -0.01, -1);
+    } else {
+      this.crosshair.position.set(-0.005, -0.02, -1);
+    }
   }
 }
