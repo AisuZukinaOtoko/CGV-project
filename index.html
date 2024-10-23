@@ -5,9 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CGV Project</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./src/GameMenu/style.css">
+
+    <style>
+      #intro {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+        z-index: 999; /* Ensure it's on top of everything */
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      #intro.hidden {
+        display: none; /* Hide the overlay when not needed */
+      }
+
+      #exit-button {
+        margin-top: 10px;
+      }
+    </style>
+    
   </head>
   <body>
     <canvas id="Main-Canvas"></canvas>
-    <script type="module" src="./src/main.js"></script>
+    <script type="module" src="./src/GameMenu/script.js"></script>
+
+    <!-- Game menu start -->
+
+      <!-- Audio  for the background music -->
+      <audio id="menu-sound" src="./src/assets/Sounds/back.wav" loop></audio>
+      
+      <section id="intro">
+        <div class="menu"> 
+          <h1 class="game-title">DeadZone: Survival Rush</h1>
+          <div class="menu-buttons"> 
+            <button class="menu-btn" id="start-button">Play</button>
+            <button class="menu-btn" id="exit-button">Exit</button>
+          </div>
+        </div>
+      </section>
+
+    <!-- Game menu end -->
+
+    <div class="health-bar" data-total="1000" data-value="1000">
+      <div class="bar">
+          <div class="hit"></div>
+      </div>
+    </div>
+
+    <div id="game-ui">
+      <h1 id="timer">04:00</h1>
+      <h2 id="kill-counter">KILLS: 0</h2>
+    </div>
+
+    <div id="game-over" style="display: none;">
+      <h1>Game Over</h1>
+      <button id="restart-button">Restart</button>
+    </div>
+    <!-- <div id="ammo-counter">
+      <div id="gun-icon"></div>
+      <div id="ammo-count">90 / 90</div>
+    </div> -->
   </body>
 </html>

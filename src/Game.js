@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import StartScene from "./scenes/StartupScene.js";
+import StartScene from "./scenes/setup/StartupScene.js";
 
 export default class Game {
   constructor() {
@@ -10,6 +10,7 @@ export default class Game {
       100
     );
     this.m_CurrentScene;
+    this.paused = false;
 
     // Game initialisations
     this.m_Renderer = new THREE.WebGLRenderer({
@@ -21,6 +22,20 @@ export default class Game {
 
     // Initialize the first scene
     this.StartNewScene(StartScene);
+
+    // ---- START --> Block of code starting from 28-36 handle the pause
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          this.paused = true; // Toggle pause state when ESC is pressed
+        }
+      });
+
+      document.getElementById("start-button").addEventListener("click", () => {
+        this.paused = false;
+      });
+
+    // ---- END
   }
 
   StartNewScene(SceneClass) {
@@ -37,7 +52,21 @@ export default class Game {
     if (this.m_CurrentScene.m_RequestSceneSwitch) {
       this.StartNewScene(this.m_CurrentScene.m_SwitchScene);
     }
-    const delta = this.m_Clock.getDelta();
+
+    /* logic to pause and resume start */ 
+
+      let delta;
+
+      if (this.paused){
+        delta = 0;
+        return;
+      }else{
+        delta = this.m_Clock.getDelta();
+      }
+
+    /* logic to pause and resume end */ 
+
+
     this.m_CurrentScene.OnUpdate(delta);
     this.m_CurrentScene.OnPreRender();
 
