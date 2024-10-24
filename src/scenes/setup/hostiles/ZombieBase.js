@@ -11,24 +11,43 @@ export const DEAD = "6";
 
 export default class Zombie extends GameEntity {
     constructor(playerPos) {
-        super();
-        this.stateMachine = new StateMachine(this);
-        this.playerPos = playerPos;
-        this.targetPos = new THREE.Vector3(0, 0, 0);
-        this.health = 100;
-        this.sightDistance = 10;
-        this.smellDistance = 10;
-        this.attackDistance = 3;
-        this.speed = 1;
-        this.isAggravated = false;  // Placeholder for when the zombie is aggravated by the player
-        this.deltaTime = 0;
+      super();
+      this.stateMachine = new StateMachine(this);
+      this.playerPos = playerPos;
+      this.targetPos = new THREE.Vector3(0, 0, 0);
+      this.health = 100;
+      this.sightDistance = 30;
+      this.smellDistance = 30;
+      this.attackDistance = 3;
+      this.speed = 1;
+      this.isAggravated = false;  // Placeholder for when the zombie is aggravated by the player
+      this.deltaTime = 0;
+      this.isMoving = false;
     }
 
     OnUpdate(delta) {
         this.stateMachine.update();
     }
 
+    FollowPath(path){
+      if (!path || path.length <= 0)
+        return;
+
+      let pathTarget = path[0];
+      const distance = pathTarget.clone().sub(this.mesh.position);
+
+      if (distance.lengthSq() > this.speed){
+        distance.normalize();
+        this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
+        //this.mesh.position.y = 0; // remove later
+        this.LookAt(pathTarget);
+      } else{
+        path.shift();
+      }
+    }
+
     MoveToTarget(){
+      return;
       // Get the current position of the mesh
       const meshPosition = this.mesh.position.clone();
       
@@ -39,32 +58,16 @@ export default class Zombie extends GameEntity {
       // Calculate the target angle using Math.atan2
       const targetYAngle = Math.atan2(targetDirection.x, targetDirection.z); // Assuming forward is along the Z-axis
       this.mesh.rotation.y = targetYAngle;
-
-      // Smoothly interpolate the mesh's Y rotation towards the target angle
-      //this.mesh.rotation.y += THREE.MathUtils.euclideanDistance(this.mesh.rotation.y, targetYAngle) * this.speed * this.deltaTime * 5;
-      //const difference = this.mesh.rotation.y - targetYAngle
-      //this.mesh.rotation.y += (difference / Math.abs(difference)) * this.speed * this.deltaTime;
-      //this.mesh.rotation.y = THREE.MathUtils.lerpAngle(this.mesh.rotation.y, targetYAngle, this.speed * this.deltaTime * 5);
-
-      // const meshPosition = this.mesh.position.clone();
-      // const directionToTarget = new THREE.Vector3();
-      // directionToTarget.subVectors(this.playerPos, meshPosition).normalize();
-  
-      // // Calculate the target angle using the direction vector
-      // const targetQuaternion = new THREE.Quaternion();
-      // targetQuaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), directionToTarget);
-  
-      // const currentQuaternion = this.mesh.quaternion.clone();
-      // const newQuaternion = new THREE.Quaternion();
-      // newQuaternion.slerpQuaternions(currentQuaternion, targetQuaternion, 0.5 * this.deltaTime);
-
-      // this.mesh.quaternion.copy(newQuaternion);
-
+      
       if (this.CanSeeTarget(this.targetPos)){
         targetDirection.multiplyScalar(this.speed * this.deltaTime);
         this.mesh.position.x += targetDirection.x;
         this.mesh.position.z += targetDirection.z;
       }
+    }
+
+    LookAt(target){
+      this.mesh.lookAt(target);
     }
 
     // Vector 3 target

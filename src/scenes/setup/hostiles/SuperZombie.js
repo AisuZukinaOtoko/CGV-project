@@ -153,6 +153,11 @@ export default class SuperZombie extends Zombie {
     this.idleAction = this.mixer.clipAction(gltf.animations[6]);
     //this.screamAction = this.mixer.clipAction(gltf.animations[1]);
 
+    this.dieBackAction.loop = THREE.LoopOnce;
+    this.dieForwardAction.loop = THREE.LoopOnce;
+    this.dieBackAction.clampWhenFinished = true;
+    this.dieForwardAction.clampWhenFinished = true;
+
     // Adjust run animation speed to match desired movement speed
     //const runSpeed = this.speed / this.movementVector.length();
     //this.runAction.setEffectiveTimeScale(runSpeed);
@@ -213,5 +218,20 @@ export default class SuperZombie extends Zombie {
     this.dieForwardAction.stop();
     this.dieBackAction.stop();
     this.runAction.stop();
+  }
+
+  BlendAction(newAction){
+    const currentActions = this.mixer._actions;
+
+    // Fade out all current actions
+    currentActions.forEach((action) => {
+        if (action.isRunning()) {
+            action.fadeOut(0.3);
+        }
+    });
+
+    newAction.reset();
+    newAction.fadeIn(0.3);
+    newAction.play();
   }
 }

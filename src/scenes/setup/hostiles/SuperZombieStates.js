@@ -22,8 +22,10 @@ export class InitState extends State {
 
 export class IdleState extends State {
     enter(zombie) {
-        zombie.ResetAllActions();
-        zombie.idleAction.play();
+        //zombie.ResetAllActions();
+        //zombie.idleAction.play();
+        zombie.BlendAction(zombie.idleAction);
+        zombie.isMoving = false;
     }
   
     execute(zombie) {
@@ -44,9 +46,11 @@ export class IdleState extends State {
 
 export class WalkingState extends State {
     enter(zombie) {
-        zombie.ResetAllActions();
-        zombie.runAction.play();
+        //zombie.ResetAllActions();
+        //zombie.runAction.play();
+        zombie.BlendAction(zombie.runAction);
         zombie.speed = 1;
+        zombie.isMoving = true;
     }
 
     execute(zombie) {
@@ -64,9 +68,11 @@ export class WalkingState extends State {
 
 export class AggravatedState extends State {
     enter(zombie) {
-        zombie.ResetAllActions();
-        zombie.runAction.play();
+        //zombie.ResetAllActions();
+        //zombie.runAction.play();
+        zombie.BlendAction(zombie.runAction);
         zombie.speed = 1.5;
+        zombie.isMoving = true;
     }
 
     execute(zombie) {
@@ -89,8 +95,10 @@ export class AggravatedState extends State {
 
 export class AttackState extends State {
     enter(zombie) {
-        zombie.ResetAllActions();
-        zombie.attackAction.play();
+        //zombie.ResetAllActions();
+        //zombie.attackAction.play();
+        zombie.BlendAction(zombie.attackAction);
+        zombie.isMoving = false;
     }
 
     execute(zombie) {
@@ -114,9 +122,11 @@ export class AttackState extends State {
 
 export class InjuredState extends State {
     enter(zombie) {
-        zombie.ResetAllActions();
-        zombie.hurtCrawlAction.play();
+        //zombie.ResetAllActions();
+        //zombie.hurtCrawlAction.play();
+        zombie.BlendAction(zombie.hurtCrawlAction);
         zombie.health -= 10;
+        zombie.isMoving = true;
     }
 
     execute(zombie) {
@@ -153,8 +163,10 @@ export class StartledState extends State {
 
 export class DeadState extends State {
     enter(zombie) {
-        zombie.ResetAllActions();
-        zombie.dieBackAction.play();
+        //zombie.ResetAllActions();
+        //zombie.dieBackAction.play();
+        zombie.BlendAction(zombie.dieBackAction);
+        zombie.isMoving = false;
     }
 
     execute(zombie) {
