@@ -34,6 +34,22 @@ export default class SuperZombie extends Zombie {
     this.deltaTime = null;
     this.PlayerDamage = 0;
 
+    this.BoneColliders = [];
+    this.headBone;
+    this.spineBone;
+    this.leftLegUpBone;
+    this.leftLegDownBone;
+    this.rightLegUpBone;
+    this.rightLegDownBone;
+    this.rightForeArmBone;
+    this.headCollider;
+    this.spineCollider;
+    this.leftLegUpCollider;
+    this.rightLegUpCollider;
+    this.leftLegDownCollider;
+    this.rightLegDownCollider;
+    this.rightForeArmCollider;
+
     // zombie state setup
     this.stateMachine.add(10000, new InitState());
     this.stateMachine.add(IDLE, new IdleState());
@@ -54,10 +70,7 @@ export default class SuperZombie extends Zombie {
         this.mesh.scale.set(1.2, 1.2, 1.2);
         this.mesh.position.copy(initialPosition);
 
-        // Create a more precise collision shape
-        this.createCollisionShape();
-
-        // Set up animations
+        this.CreateSkeletalColliders(scene);
         this.setupAnimations(gltf);
 
         scene.add(this.mesh);
@@ -73,66 +86,112 @@ export default class SuperZombie extends Zombie {
     );
   }
 
-  createCollisionShape() {
-    // Body dimensions
-    const bodyRadius = 0.3; // Adjust based on your zombie's actual width
-    const bodyHeight = 1.4; // Adjust based on your zombie's actual height
+  CreateSkeletalColliders(scene){
+    this.mesh.traverse((child) => {
+      if (child.isSkinnedMesh) {
+        const skeleton = child.skeleton;
+        console.log(skeleton);
+        this.headBone = skeleton.bones.find((bone) => bone.name === "mixamorigHead");
+        this.spineBone = skeleton.bones.find((bone) => bone.name === "mixamorigSpine1");
+        this.leftLegDownBone = skeleton.bones.find((bone) => bone.name === "mixamorigLeftLeg");
+        this.leftLegUpBone = skeleton.bones.find((bone) => bone.name === "mixamorigLeftUpLeg");
+        this.rightLegDownBone = skeleton.bones.find((bone) => bone.name === "mixamorigRightLeg");
+        this.rightLegUpBone = skeleton.bones.find((bone) => bone.name === "mixamorigRightUpLeg");
+        this.rightForeArmBone = skeleton.bones.find((bone) => bone.name === "mixamorigRightHandIndex2");
 
-    // Head dimensions
-    const headRadius = 0.2; // Adjust based on your zombie's head size
+        const colliderMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5, wireframe: true });
+        // Head collider
+        const headGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+        this.headCollider = new THREE.Mesh(headGeometry, colliderMaterial);
 
-    // Create body cylinder
-    const bodyGeometry = new THREE.CylinderGeometry(
-      bodyRadius,
-      bodyRadius,
-      bodyHeight,
-      8
-    );
-    const bodyMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.5,
-      wireframe: true,
+        // Body collider
+        //const bodyGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 6);
+        const bodyGeometry = new THREE.BoxGeometry(0.5, 1, 0.3);
+        this.spineCollider = new THREE.Mesh(bodyGeometry, colliderMaterial);
+
+        // Leg Colliders
+        const legGeometry = new THREE.BoxGeometry(0.25, 0.5, 0.25);
+        this.leftLegUpCollider = new THREE.Mesh(legGeometry, colliderMaterial);
+        this.rightLegUpCollider = new THREE.Mesh(legGeometry, colliderMaterial);
+        this.leftLegDownCollider = new THREE.Mesh(legGeometry, colliderMaterial);
+        this.rightLegDownCollider = new THREE.Mesh(legGeometry, colliderMaterial);
+
+        // ForeArm Collider
+        const armGeometry = new THREE.SphereGeometry(0.13, 8, 8);
+        this.rightForeArmCollider = new THREE.Mesh(armGeometry, colliderMaterial);
+
+        scene.add(this.headCollider);
+        scene.add(this.spineCollider);
+        scene.add(this.leftLegUpCollider);
+        scene.add(this.rightLegUpCollider);
+        scene.add(this.leftLegDownCollider);
+        scene.add(this.rightLegDownCollider);
+        scene.add(this.rightForeArmCollider);
+
+      }
     });
-    const bodyCollider = new THREE.Mesh(bodyGeometry, bodyMaterial);
-
-    // Create head sphere
-    const headGeometry = new THREE.SphereGeometry(headRadius, 8, 8);
-    const headMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.5,
-      wireframe: true,
-    });
-    const headCollider = new THREE.Mesh(headGeometry, headMaterial);
-
-    // Position colliders
-    bodyCollider.position.set(0, bodyHeight / 2, 0); // Center of the body
-    headCollider.position.set(0, bodyHeight + headRadius, 0); // Top of the body
-
-    // Create a group to hold both colliders
-    this.collisionShape = new THREE.Group();
-    this.collisionShape.add(bodyCollider);
-    this.collisionShape.add(headCollider);
-
-    // Position the collision shape relative to the mesh
-    this.collisionShape.position.set(0, 0, 0); // Center it on the mesh
-    this.mesh.add(this.collisionShape);
-
-    if (
-      this.collisionManager &&
-      typeof this.collisionManager.addCollidableObject === "function"
-    ) {
-      this.collisionManager.addCollidableObject(this.collisionShape);
-    } else {
-      console.warn(
-        "CollisionManager is not properly initialized or lacks addCollidableObject method"
-      );
-    }
-
-    // Initially hide the collision shape
-    this.collisionShape.visible = true;
   }
+
+  // createCollisionShape() {
+  //   // Body dimensions
+  //   const bodyRadius = 0.3; // Adjust based on your zombie's actual width
+  //   const bodyHeight = 1.4; // Adjust based on your zombie's actual height
+
+  //   // Head dimensions
+  //   const headRadius = 0.2; // Adjust based on your zombie's head size
+
+  //   // Create body cylinder
+  //   const bodyGeometry = new THREE.CylinderGeometry(
+  //     bodyRadius,
+  //     bodyRadius,
+  //     bodyHeight,
+  //     8
+  //   );
+  //   const bodyMaterial = new THREE.MeshBasicMaterial({
+  //     color: 0x00ff00,
+  //     transparent: true,
+  //     opacity: 0.5,
+  //     wireframe: true,
+  //   });
+  //   const bodyCollider = new THREE.Mesh(bodyGeometry, bodyMaterial);
+
+  //   // Create head sphere
+  //   const headGeometry = new THREE.SphereGeometry(headRadius, 8, 8);
+  //   const headMaterial = new THREE.MeshBasicMaterial({
+  //     color: 0x00ff00,
+  //     transparent: true,
+  //     opacity: 0.5,
+  //     wireframe: true,
+  //   });
+  //   const headCollider = new THREE.Mesh(headGeometry, headMaterial);
+
+  //   // Position colliders
+  //   bodyCollider.position.set(0, bodyHeight / 2, 0); // Center of the body
+  //   headCollider.position.set(0, bodyHeight + headRadius, 0); // Top of the body
+
+  //   // Create a group to hold both colliders
+  //   this.collisionShape = new THREE.Group();
+  //   this.collisionShape.add(bodyCollider);
+  //   this.collisionShape.add(headCollider);
+
+  //   // Position the collision shape relative to the mesh
+  //   this.collisionShape.position.set(0, 0, 0); // Center it on the mesh
+  //   this.mesh.add(this.collisionShape);
+
+  //   if (
+  //     this.collisionManager &&
+  //     typeof this.collisionManager.addCollidableObject === "function"
+  //   ) {
+  //     this.collisionManager.addCollidableObject(this.collisionShape);
+  //   } else {
+  //     console.warn(
+  //       "CollisionManager is not properly initialized or lacks addCollidableObject method"
+  //     );
+  //   }
+
+  //   // Initially hide the collision shape
+  //   this.collisionShape.visible = true;
+  // }
 
   toggleCollisionShapeVisibility(visible) {
     if (this.collisionShape) {
@@ -173,6 +232,40 @@ export default class SuperZombie extends Zombie {
     }
     
     this.stateMachine.update();
+    this.headCollider.position.copy(this.headBone.getWorldPosition(new THREE.Vector3()));
+    this.spineCollider.quaternion.copy(this.spineBone.getWorldQuaternion(new THREE.Quaternion()));
+    this.spineCollider.position.copy(this.spineBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0, 0)));
+
+    this.leftLegUpCollider.position.copy(this.leftLegUpBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, 0.1)));
+    this.leftLegUpCollider.quaternion.copy(this.leftLegUpBone.getWorldQuaternion(new THREE.Quaternion()));
+    this.leftLegDownCollider.position.copy(this.leftLegDownBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, -0.05)));
+    this.leftLegDownCollider.quaternion.copy(this.leftLegDownBone.getWorldQuaternion(new THREE.Quaternion()));
+
+    this.rightLegUpCollider.position.copy(this.rightLegUpBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, 0.1)));
+    this.rightLegUpCollider.quaternion.copy(this.rightLegUpBone.getWorldQuaternion(new THREE.Quaternion()));
+    this.rightLegDownCollider.position.copy(this.rightLegDownBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, -0.05)));
+    this.rightLegDownCollider.quaternion.copy(this.rightLegDownBone.getWorldQuaternion(new THREE.Quaternion()));
+
+    this.rightForeArmCollider.position.copy(this.rightForeArmBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0, 0)));
+    this.rightForeArmCollider.quaternion.copy(this.rightForeArmBone.getWorldQuaternion(new THREE.Quaternion()));
+    // const worldQuaternion = new THREE.Quaternion();
+    //       specificBone.getWorldQuaternion(worldQuaternion);
+
+    //       // Optionally convert the world quaternion to Euler angles (if needed)
+    //       const worldEuler = new THREE.Euler().setFromQuaternion(worldQuaternion);
+
+    //       console.log(`World Rotation (Euler):`, worldEuler); // x, y, z in radians
+
+    //       // Apply the world rotation to the collider geometry
+    //       colliderGeometry.rotation.copy(worldEuler); // Assuming colliderGeometry is your geometry object
+
+    //       // If your collider uses quaternions, you can directly copy the quaternion
+    //       colliderGeometry.quaternion.copy(worldQuaternion);
+    //console.log(this.headBone.getWorldPosition());
+    //const temp = this.headBone.getWorldPosition(new THREE.Vector3())
+    //this.headCollider.position.x = temp.x;
+    //this.headCollider.position.y = temp.y;
+    //this.headCollider.position.z = temp.z;
 
     // if (this.isRunning && !this.checkCollision()) {
     //   const movement = this.movementVector

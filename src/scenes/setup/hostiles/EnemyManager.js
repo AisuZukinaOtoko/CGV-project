@@ -17,11 +17,11 @@ export default class EnemyManager {
     this.navmesh = undefined;
     this.groupID = undefined;
 
-    this.zombieNum = 1;
+    this.zombieNum = 15;
     this.SuperZombies = [];
 
     for (let i = 0; i < this.zombieNum; i++) {
-      const initialPosition = new THREE.Vector3(6 * i, 0, -12);
+      const initialPosition = new THREE.Vector3(6 * i, 0, -15);
       const zombie = new SuperZombie(this.scene, this.collisionManager, initialPosition, this.player.position);
       this.SuperZombies.push(zombie);
     }
@@ -53,7 +53,7 @@ export default class EnemyManager {
       });
       
       //this.navmesh = navmesh;
-      this.scene.add(this.navmesh);
+      //this.scene.add(this.navmesh);
       this.pathFindingEnabled = true;
       this.scene.add(this.pathFinderHelper);
     });

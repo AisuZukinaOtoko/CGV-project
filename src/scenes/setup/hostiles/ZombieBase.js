@@ -15,9 +15,10 @@ export default class Zombie extends GameEntity {
       this.stateMachine = new StateMachine(this);
       this.playerPos = playerPos;
       this.targetPos = new THREE.Vector3(0, 0, 0);
+      this.immediateDestination = new THREE.Vector3(0, 0, 0); // next destination on the path to the target
       this.health = 100;
       this.sightDistance = 30;
-      this.smellDistance = 30;
+      this.smellDistance = 10;
       this.attackDistance = 3;
       this.speed = 1;
       this.isAggravated = false;  // Placeholder for when the zombie is aggravated by the player
@@ -30,19 +31,27 @@ export default class Zombie extends GameEntity {
     }
 
     FollowPath(path){
-      if (!path || path.length <= 0)
-        return;
+      let pathTarget;
 
-      let pathTarget = path[0];
+      if (!path || path.length <= 0){
+        pathTarget = this.immediateDestination;
+        //return;
+      }
+      else {
+        pathTarget = path[0];
+        this.immediateDestination = pathTarget;
+      }
+
       const distance = pathTarget.clone().sub(this.mesh.position);
 
       if (distance.lengthSq() > this.speed){
         distance.normalize();
         this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
-        //this.mesh.position.y = 0; // remove later
         this.LookAt(pathTarget);
+        //this.mesh.rotation.x = 0; // remove later
       } else{
-        path.shift();
+        if (path)
+          path.shift();
       }
     }
 
