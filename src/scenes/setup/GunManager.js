@@ -41,7 +41,7 @@ export class GunManager {
     );
 
     loader.load(
-      "src/assets/player/final.glb",
+      "src/assets/player/steve.glb",
       (gltf) => {
         this.playerModel = gltf.scene;
         this.playerModel.scale.set(1, 1, 1);

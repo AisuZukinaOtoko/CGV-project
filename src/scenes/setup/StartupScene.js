@@ -10,6 +10,7 @@ import { PlayerManager } from "./PlayerManager.js";
 import { EnvironmentManager } from "./EnvironmentManager.js";
 import { GunManager } from "./GunManager.js";
 import { GameUI } from "./gameUI.js";
+import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -74,6 +75,7 @@ export default class StartupScene extends Scene {
       this.playerManager.playerObject,
       this.collisionManager
     );
+    this.enemyManager.EnablePathFinding('src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene-navmesh2.glb');
   }
 
   setupStats() {
@@ -119,6 +121,19 @@ export default class StartupScene extends Scene {
   }
 
   OnUpdate(deltaTime) {
+    if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)){
+      this.m_MainCamera.fov -= 1;
+      if (this.m_MainCamera.fov < 30){
+        this.m_MainCamera.fov = 30;
+      }
+    }
+    else {
+      this.m_MainCamera.fov += 1;
+      if (this.m_MainCamera.fov > 45){
+        this.m_MainCamera.fov = 45;
+      }
+    }
+    this.m_MainCamera.updateProjectionMatrix();
     this.stats.update();
     this.gameUI.update();
     this.playerManager.update(deltaTime);

@@ -58,6 +58,7 @@ export default class Game {
       let delta;
 
       if (this.paused){
+        delta = this.m_Clock.getDelta();
         delta = 0;
         return;
       }else{
