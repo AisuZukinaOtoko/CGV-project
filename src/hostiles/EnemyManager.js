@@ -7,13 +7,14 @@ export default class EnemyManager {
         this.scene = scene;
         this.player = player;
  
-        this.zombieNum = 2;
+        this.zombieNum = 1;
         this.SuperZombies = [];
         this.collidableMeshList = collidableMeshList; // Pass the collidable objects
 
         for (let i = 0; i < this.zombieNum; i++) {
-            const initialPosition = new THREE.Vector3(2 * i, 0, 5); // Stagger along x-axis
+            const initialPosition = new THREE.Vector3(2 * i, 0, 0); // Stagger along x-axis
             const zombie = new SuperZombie(this.scene, this.collidableMeshList,initialPosition);
+            //zombie.stateMachine.change(IDLE);
 
             // Set initial position for each zombie
             this.SuperZombies.push(zombie);
