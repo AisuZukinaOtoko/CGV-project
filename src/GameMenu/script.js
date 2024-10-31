@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const restartButton2 = document.getElementById("restart-button3");
 
   const audioSettingsButton = document.getElementById("audio-settings-button");
-  const volumeSlider = document.getElementById("volume-slider");
+  // const volumeSlider = document.getElementById("volume-slider");
   const controlsButton = document.getElementById("controls-button");
   const audioButton = document.getElementById("audio-button");
   const audioPopup = document.getElementById("audio-popup");
@@ -51,9 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
     audioButton.textContent = isAudioMuted ? "Unmute Sound" : "Mute Sound";
   }
 
-  function adjustVolume() {
-    menuSound.volume = volumeSlider.value;
-  }
+  // function adjustVolume() {
+  //   menuSound.volume = volumeSlider.value;
+  // }
 
   function showControls() {
     controlsPopup.classList.remove("hidden");
@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
   controlsButton.addEventListener("click", showControls);
   audioButton.addEventListener("click", toggleAudio);
   audioSettingsButton.addEventListener("click", showAudioSettings);
-  volumeSlider.addEventListener("input", adjustVolume);
+  // volumeSlider.addEventListener("input", adjustVolume);
   closeControlsButton.addEventListener("click", hideControls);
   closeAudioButton.addEventListener("click", hideAudioSettings);
 

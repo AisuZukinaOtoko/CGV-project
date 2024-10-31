@@ -8,6 +8,68 @@
     <link rel="stylesheet" href="./src/GameMenu/style.css">
 
     <style>
+      /* Loading screen styles */
+      #loading-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: black;
+        color: white;
+        font-size: 1.5em;
+        z-index: 10000;
+      }
+
+
+      #lds-facebook {
+        color: white;
+      }
+      #lds-facebook,
+      #lds-facebook div {
+        box-sizing: border-box;
+      }
+      #lds-facebook {
+        display: inline-block;
+        position: relative;
+        width: 80px;
+        height: 80px;
+      }
+      #lds-facebook div {
+        display: inline-block;
+        position: absolute;
+        left: 8px;
+        width: 16px;
+        background: currentColor;
+        animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+      }
+      #lds-facebook div:nth-child(1) {
+        left: 8px;
+        animation-delay: -0.24s;
+      }
+      #lds-facebook div:nth-child(2) {
+        left: 32px;
+        animation-delay: -0.12s;
+      }
+      #lds-facebook div:nth-child(3) {
+        left: 56px;
+        animation-delay: 0s;
+      }
+      @keyframes lds-facebook {
+        0% {
+          top: 8px;
+          height: 64px;
+        }
+        50%, 100% {
+          top: 24px;
+          height: 32px;
+        }
+      }
+
       /* Styles for the audio and controls buttons */
       #audio-button, #controls-button{
         margin: 5px;
@@ -112,6 +174,11 @@
     
   </head>
   <body>
+    <!-- Loading Screen -->
+    <section id="loading-screen">
+      <div id="lds-facebook"><div></div><div></div><div></div></div>
+    </section>
+
     <canvas id="Main-Canvas"></canvas>
     <script type="module" src="./src/GameMenu/script.js"></script>
 
@@ -179,8 +246,8 @@
     <!-- Audio Settings Popup -->
     <div id="audio-popup" class="popup hidden">
       <h2>Audio Settings</h2>
-      <label for="volume-slider">Volume:</label>
-      <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1">
+      <!-- <label for="volume-slider">Volume:</label>
+      <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1"> -->
       <button class="menu-btn" id="audio-button">Toggle Sound</button>
       <button id="close-audio">Close</button>
     </div>
@@ -195,6 +262,18 @@
       <h1 id="timer">04:00</h1>
       <h2 id="kill-counter">KILLS: 0</h2>
     </div>
+
+    <script>
+      // Delay duration in milliseconds (e.g., 3000ms = 3 seconds)
+      const loadingDelay = 4000;
+
+      window.addEventListener('load', function () {
+        // Keep the loading screen visible for a set amount of time
+        setTimeout(function () {
+          document.getElementById('loading-screen').style.display = 'none';
+        }, loadingDelay);
+      });
+    </script>
 
     <!-- Whenever I comment lines 160 - 164 the game glitches. Gael -->
     <div id="game-over" style="display: none;">
