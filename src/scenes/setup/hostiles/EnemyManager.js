@@ -17,7 +17,7 @@ export default class EnemyManager {
     this.navmesh = undefined;
     this.groupID = undefined;
 
-    this.zombieNum = 15;
+    this.zombieNum = 5;
     this.SuperZombies = [];
 
     for (let i = 0; i < this.zombieNum; i++) {
@@ -43,17 +43,11 @@ export default class EnemyManager {
       gltf.scene.traverse( (node) => {
         if (node.isMesh && node.geometry){
          this.navmesh = node;
-
-         const zone = Pathfinding.createZone(this.navmesh.geometry);
-         
-         console.log(this.PathZone);
+         const zone = Pathfinding.createZone(this.navmesh.geometry);         
          this.pathFinder.setZoneData(this.PathZone, zone);
-         console.log(this.PathZone);
         }
       });
       
-      //this.navmesh = navmesh;
-      //this.scene.add(this.navmesh);
       this.pathFindingEnabled = true;
       this.scene.add(this.pathFinderHelper);
     });
@@ -63,8 +57,18 @@ export default class EnemyManager {
   OnUpdate(deltaTime) {
     var i = 0;
     for (const zombie of this.SuperZombies) {
-      if (zombie.SetupComplete && this.pathFindingEnabled) {
+      if (zombie.SetupComplete && this.pathFindingEnabled && !zombie.disposed) {
         zombie.OnUpdate(deltaTime);
+
+        if (zombie.isDead){ // clean up some zombie resources
+          zombie.colliders.forEach((collider) => {
+            this.scene.remove(collider);
+            collider.geometry.dispose(); // Free geometry memory
+            collider.material.dispose(); // Free material memory
+          });
+          zombie.disposed = true;
+          continue;
+        }
 
         // Zombie pathfinding
         if (!zombie.isMoving)
@@ -76,17 +80,13 @@ export default class EnemyManager {
         const ZombieGroupID = this.pathFinder.getGroup(this.PathZone, zombiePos);
         const closestZombieNode = this.pathFinder.getClosestNode(zombiePos, this.PathZone, ZombieGroupID);
         
-        const TargetGroupID = this.pathFinder.getGroup(this.PathZone, zombieTarget);
-        const closestTargetNode = this.pathFinder.getClosestNode(zombieTarget, this.PathZone, TargetGroupID);
+        //const TargetGroupID = this.pathFinder.getGroup(this.PathZone, zombieTarget);
+        //const closestTargetNode = this.pathFinder.getClosestNode(zombieTarget, this.PathZone, TargetGroupID);
         const path = this.pathFinder.findPath(closestZombieNode.centroid, zombieTarget, this.PathZone, ZombieGroupID);
-        //const path = this.pathFinder.findPath(closestZombieNode.centroid, closestTargetNode.centroid, this.PathZone, ZombieGroupID);
         
         zombie.FollowPath(path);
-        //console.log("Yea");
-        //let path = this.pathFinder.findPath(zombie.mesh.position, target, this.PathZone);
         
-        if (path && i == 0){
-          //console.log("Zombie moving");
+        if (path && i == 0){ // debug path viewing
           this.pathFinderHelper.setPlayerPosition(zombiePos);
           this.pathFinderHelper.setTargetPosition(zombieTarget);
           this.pathFinderHelper.reset();
@@ -94,6 +94,43 @@ export default class EnemyManager {
         }
       }      
       i++;
+    }
+
+  }
+
+  // returns true if bullet hit a zombie, false otherwise.
+  BulletHitCheck(origin, direction, camera, damage){
+    const raycaster = new THREE.Raycaster();
+    raycaster.camera = camera;
+    raycaster.far = 300;
+    raycaster.set(origin, direction);
+
+    const intersectsEnvironment = raycaster.intersectObjects(this.scene.children, true);
+    
+    if (intersectsEnvironment.length > 1){
+      const firstIntersect = intersectsEnvironment[1]; // 0 is the crosshair sprite surprisingly...
+      if (firstIntersect.object.type === "SkinnedMesh"){ // We hit the zombie mesh first, so lets check where we hit the zombie
+        if (intersectsEnvironment.length > 1){
+          const secondIntersect = intersectsEnvironment[2];
+          if (secondIntersect.object.isCollider){ // We hit the zombie
+            secondIntersect.object.bulletHit = true;
+            secondIntersect.object.bulletDamage = damage;
+          }
+          else { 
+            // We hit the zombie, but we don't know where
+          }
+        }
+        else { 
+          // We hit the zombie, but we don't know where
+        }
+      }
+      else if (firstIntersect.object.isCollider){ // We hit the zombie
+        firstIntersect.object.bulletHit = true;
+        firstIntersect.object.bulletDamage = damage;
+      }
+      else {
+         // We hit nothing
+      }
     }
   }
 }

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import Collider, { HEAD, HAND, TORSO, LEFTLEGDOWN, RIGHTLEGDOWN, LEFTLEGUP, RIGHTLEGUP } from "./ZombieCollider";
 import Zombie from "./ZombieBase";
 import { IDLE, WALKING, AGGRAVATED, ATTACK, INJURED, STARTLED, DEAD } from './ZombieBase';
 import { GameEntity, State, StateMachine, Vector3 } from 'yuka';
@@ -34,6 +35,7 @@ export default class SuperZombie extends Zombie {
     this.deltaTime = null;
     this.PlayerDamage = 0;
 
+    this.colliders = [];
     this.BoneColliders = [];
     this.headBone;
     this.spineBone;
@@ -90,7 +92,6 @@ export default class SuperZombie extends Zombie {
     this.mesh.traverse((child) => {
       if (child.isSkinnedMesh) {
         const skeleton = child.skeleton;
-        console.log(skeleton);
         this.headBone = skeleton.bones.find((bone) => bone.name === "mixamorigHead");
         this.spineBone = skeleton.bones.find((bone) => bone.name === "mixamorigSpine1");
         this.leftLegDownBone = skeleton.bones.find((bone) => bone.name === "mixamorigLeftLeg");
@@ -102,96 +103,37 @@ export default class SuperZombie extends Zombie {
         const colliderMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5, wireframe: true });
         // Head collider
         const headGeometry = new THREE.SphereGeometry(0.2, 8, 8);
-        this.headCollider = new THREE.Mesh(headGeometry, colliderMaterial);
+        const headCollider = new Collider(headGeometry, colliderMaterial, HEAD);
+        this.colliders.push(headCollider);
 
         // Body collider
-        //const bodyGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 6);
         const bodyGeometry = new THREE.BoxGeometry(0.5, 1, 0.3);
-        this.spineCollider = new THREE.Mesh(bodyGeometry, colliderMaterial);
+        const spineCollider = new Collider(bodyGeometry, colliderMaterial, TORSO);
+        this.colliders.push(spineCollider);
 
         // Leg Colliders
         const legGeometry = new THREE.BoxGeometry(0.25, 0.5, 0.25);
-        this.leftLegUpCollider = new THREE.Mesh(legGeometry, colliderMaterial);
-        this.rightLegUpCollider = new THREE.Mesh(legGeometry, colliderMaterial);
-        this.leftLegDownCollider = new THREE.Mesh(legGeometry, colliderMaterial);
-        this.rightLegDownCollider = new THREE.Mesh(legGeometry, colliderMaterial);
+        const leftLegUpCollider = new Collider(legGeometry, colliderMaterial, LEFTLEGUP);
+        const rightLegUpCollider = new Collider(legGeometry, colliderMaterial, RIGHTLEGUP);
+        const leftLegDownCollider = new Collider(legGeometry, colliderMaterial, LEFTLEGDOWN);
+        const rightLegDownCollider = new Collider(legGeometry, colliderMaterial, RIGHTLEGDOWN);
+        this.colliders.push(leftLegUpCollider);
+        this.colliders.push(rightLegUpCollider);
+        this.colliders.push(leftLegDownCollider);
+        this.colliders.push(rightLegDownCollider);
 
         // ForeArm Collider
         const armGeometry = new THREE.SphereGeometry(0.13, 8, 8);
-        this.rightForeArmCollider = new THREE.Mesh(armGeometry, colliderMaterial);
+        const rightForeArmCollider = new Collider(armGeometry, colliderMaterial, HAND);
+        this.colliders.push(rightForeArmCollider);
 
-        scene.add(this.headCollider);
-        scene.add(this.spineCollider);
-        scene.add(this.leftLegUpCollider);
-        scene.add(this.rightLegUpCollider);
-        scene.add(this.leftLegDownCollider);
-        scene.add(this.rightLegDownCollider);
-        scene.add(this.rightForeArmCollider);
+        for (const collider of this.colliders){
+          scene.add(collider);
+        }
 
       }
     });
   }
-
-  // createCollisionShape() {
-  //   // Body dimensions
-  //   const bodyRadius = 0.3; // Adjust based on your zombie's actual width
-  //   const bodyHeight = 1.4; // Adjust based on your zombie's actual height
-
-  //   // Head dimensions
-  //   const headRadius = 0.2; // Adjust based on your zombie's head size
-
-  //   // Create body cylinder
-  //   const bodyGeometry = new THREE.CylinderGeometry(
-  //     bodyRadius,
-  //     bodyRadius,
-  //     bodyHeight,
-  //     8
-  //   );
-  //   const bodyMaterial = new THREE.MeshBasicMaterial({
-  //     color: 0x00ff00,
-  //     transparent: true,
-  //     opacity: 0.5,
-  //     wireframe: true,
-  //   });
-  //   const bodyCollider = new THREE.Mesh(bodyGeometry, bodyMaterial);
-
-  //   // Create head sphere
-  //   const headGeometry = new THREE.SphereGeometry(headRadius, 8, 8);
-  //   const headMaterial = new THREE.MeshBasicMaterial({
-  //     color: 0x00ff00,
-  //     transparent: true,
-  //     opacity: 0.5,
-  //     wireframe: true,
-  //   });
-  //   const headCollider = new THREE.Mesh(headGeometry, headMaterial);
-
-  //   // Position colliders
-  //   bodyCollider.position.set(0, bodyHeight / 2, 0); // Center of the body
-  //   headCollider.position.set(0, bodyHeight + headRadius, 0); // Top of the body
-
-  //   // Create a group to hold both colliders
-  //   this.collisionShape = new THREE.Group();
-  //   this.collisionShape.add(bodyCollider);
-  //   this.collisionShape.add(headCollider);
-
-  //   // Position the collision shape relative to the mesh
-  //   this.collisionShape.position.set(0, 0, 0); // Center it on the mesh
-  //   this.mesh.add(this.collisionShape);
-
-  //   if (
-  //     this.collisionManager &&
-  //     typeof this.collisionManager.addCollidableObject === "function"
-  //   ) {
-  //     this.collisionManager.addCollidableObject(this.collisionShape);
-  //   } else {
-  //     console.warn(
-  //       "CollisionManager is not properly initialized or lacks addCollidableObject method"
-  //     );
-  //   }
-
-  //   // Initially hide the collision shape
-  //   this.collisionShape.visible = true;
-  // }
 
   toggleCollisionShapeVisibility(visible) {
     if (this.collisionShape) {
@@ -232,74 +174,85 @@ export default class SuperZombie extends Zombie {
     }
     
     this.stateMachine.update();
-    this.headCollider.position.copy(this.headBone.getWorldPosition(new THREE.Vector3()));
-    this.spineCollider.quaternion.copy(this.spineBone.getWorldQuaternion(new THREE.Quaternion()));
-    this.spineCollider.position.copy(this.spineBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0, 0)));
-
-    this.leftLegUpCollider.position.copy(this.leftLegUpBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, 0.1)));
-    this.leftLegUpCollider.quaternion.copy(this.leftLegUpBone.getWorldQuaternion(new THREE.Quaternion()));
-    this.leftLegDownCollider.position.copy(this.leftLegDownBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, -0.05)));
-    this.leftLegDownCollider.quaternion.copy(this.leftLegDownBone.getWorldQuaternion(new THREE.Quaternion()));
-
-    this.rightLegUpCollider.position.copy(this.rightLegUpBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, 0.1)));
-    this.rightLegUpCollider.quaternion.copy(this.rightLegUpBone.getWorldQuaternion(new THREE.Quaternion()));
-    this.rightLegDownCollider.position.copy(this.rightLegDownBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, -0.05)));
-    this.rightLegDownCollider.quaternion.copy(this.rightLegDownBone.getWorldQuaternion(new THREE.Quaternion()));
-
-    this.rightForeArmCollider.position.copy(this.rightForeArmBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0, 0)));
-    this.rightForeArmCollider.quaternion.copy(this.rightForeArmBone.getWorldQuaternion(new THREE.Quaternion()));
-    // const worldQuaternion = new THREE.Quaternion();
-    //       specificBone.getWorldQuaternion(worldQuaternion);
-
-    //       // Optionally convert the world quaternion to Euler angles (if needed)
-    //       const worldEuler = new THREE.Euler().setFromQuaternion(worldQuaternion);
-
-    //       console.log(`World Rotation (Euler):`, worldEuler); // x, y, z in radians
-
-    //       // Apply the world rotation to the collider geometry
-    //       colliderGeometry.rotation.copy(worldEuler); // Assuming colliderGeometry is your geometry object
-
-    //       // If your collider uses quaternions, you can directly copy the quaternion
-    //       colliderGeometry.quaternion.copy(worldQuaternion);
-    //console.log(this.headBone.getWorldPosition());
-    //const temp = this.headBone.getWorldPosition(new THREE.Vector3())
-    //this.headCollider.position.x = temp.x;
-    //this.headCollider.position.y = temp.y;
-    //this.headCollider.position.z = temp.z;
-
-    // if (this.isRunning && !this.checkCollision()) {
-    //   const movement = this.movementVector
-    //     .clone()
-    //     .multiplyScalar(this.speed * deltaTime);
-    //   this.mesh.position.add(movement);
-    // }
+    this.UpdateColliders();
   }
 
-  checkCollision() {
-    if (
-      this.collisionManager &&
-      typeof this.collisionManager.checkCollision === "function"
-    ) {
-      return this.collisionManager.checkCollision(
-        this.mesh.position,
-        this.mesh.quaternion
-      );
-    } else {
-      console.warn(
-        "CollisionManager or checkCollision method is not properly initialized"
-      );
-      return false; // Assume no collision if the method is not available
+  UpdateColliders(){
+    for (let collider of this.colliders){
+      switch (collider.type){
+        case HEAD:
+          collider.position.copy(this.headBone.getWorldPosition(new THREE.Vector3()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage * 3;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case TORSO:
+          collider.quaternion.copy(this.spineBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.position.copy(this.spineBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0, 0)));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage * 1.5;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case HAND:
+          collider.position.copy(this.rightForeArmBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0, 0)));
+          collider.quaternion.copy(this.rightForeArmBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          break;
+
+        case LEFTLEGUP:
+          collider.position.copy(this.leftLegUpBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, 0.1)));
+          collider.quaternion.copy(this.leftLegUpBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage * 0.8;
+            this.legHealth -= collider.bulletDamage;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case LEFTLEGDOWN:
+          collider.position.copy(this.leftLegDownBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, -0.05)));
+          collider.quaternion.copy(this.leftLegDownBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage;
+            this.legHealth -= collider.bulletDamage * 1.3;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case RIGHTLEGUP:
+          collider.position.copy(this.rightLegUpBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, 0.1)));
+          collider.quaternion.copy(this.rightLegUpBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage * 0.8;
+            this.legHealth -= collider.bulletDamage;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case RIGHTLEGDOWN:
+          collider.position.copy(this.rightLegDownBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, -0.05)));
+          collider.quaternion.copy(this.rightLegDownBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage;
+            this.legHealth -= collider.bulletDamage * 1.3;
+            collider.bulletHit = false;
+          }
+          break;
+
+        default:
+          break;
+      }
     }
-  }
-
-  checkCollisionWithBullet(bullet) {
-    // Implement precise collision detection with bullets
-    // This might involve raycasting or checking intersection with the convex hull
-    // For simplicity, we'll use a sphere collision for now
-    const zombiePosition = new THREE.Vector3();
-    this.mesh.getWorldPosition(zombiePosition);
-    const distance = zombiePosition.distanceTo(bullet.position);
-    return distance < 1; // Adjust the collision radius as needed
   }
 
   ResetAllActions() {
