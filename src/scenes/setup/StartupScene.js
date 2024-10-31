@@ -10,6 +10,8 @@ import { PlayerManager } from "./PlayerManager.js";
 import { EnvironmentManager } from "./EnvironmentManager.js";
 import { GunManager } from "./GunManager.js";
 import { GameUI } from "./gameUI.js";
+import { MiniMap } from "./Minimap.js";
+import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -22,10 +24,12 @@ export default class StartupScene extends Scene {
     this.m_Renderer = renderer;
     this.environmentCutoffSize = 200;
     this.initializeScene(camera, renderer);
+    this.gameUI = new GameUI(this.m_Scene);
     this.setupManagers();
     this.setupStats();
     this.setupEventListeners();
     this.setupSkybox();
+    this.miniMap = new MiniMap(this.m_Scene, this.playerManager);
   }
 
   initializeScene(camera, renderer) {
@@ -72,7 +76,14 @@ export default class StartupScene extends Scene {
     this.enemyManager = new EnemyManager(
       this.m_Scene,
       this.playerManager.playerObject,
-      this.collisionManager
+      this.collisionManager,
+      this.gameUI
+    );
+
+    this.gameUI.setEnemyManager(this.enemyManager);
+
+    this.enemyManager.EnablePathFinding(
+      "src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene-navmesh2.glb"
     );
   }
 
@@ -119,11 +130,38 @@ export default class StartupScene extends Scene {
   }
 
   OnUpdate(deltaTime) {
+    if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)) {
+      this.m_MainCamera.fov -= 1;
+      if (this.m_MainCamera.fov < 30) {
+        this.m_MainCamera.fov = 30;
+      }
+    } else {
+      this.m_MainCamera.fov += 1;
+      if (this.m_MainCamera.fov > 45) {
+        this.m_MainCamera.fov = 45;
+      }
+    }
+
+    if (Events.eventHandler.IsMouseButtonPressed(Events.MOUSE.LEFT)) {
+      const direction = new THREE.Vector3();
+      const cameraWorldPosition = new THREE.Vector3();
+      this.m_MainCamera.getWorldPosition(cameraWorldPosition);
+      this.m_MainCamera.getWorldDirection(direction);
+      this.enemyManager.BulletHitCheck(
+        cameraWorldPosition,
+        direction,
+        this.m_MainCamera,
+        20
+      );
+    }
+
+    this.m_MainCamera.updateProjectionMatrix();
     this.stats.update();
     this.gameUI.update();
     this.playerManager.update(deltaTime);
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
     this.gunManager.update();
+    this.miniMap.update();
   }
 }
