@@ -103,6 +103,8 @@
 import * as THREE from 'three';
 import { SimplexNoise } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/math/SimplexNoise.js';
 
+
+
 	class LightningStrike extends THREE.BufferGeometry {
 
 		constructor( rayParameters = {} ) {

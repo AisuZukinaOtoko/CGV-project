@@ -6,7 +6,6 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { LightningStrike } from "../../../LightningStrike";
 
-                 
 export class LightningEffect {
     constructor(scene, camera, renderer) {
         this.scene = scene;
@@ -17,7 +16,31 @@ export class LightningEffect {
         const renderPass = new RenderPass(scene, camera);
         this.composer.addPass(renderPass);
 
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.gainNode = this.audioContext.createGain(); // Create a GainNode for volume control
+        this.gainNode.gain.value = 0.1; // Set initial volume (0.0 to 1.0)
+        this.gainNode.connect(this.audioContext.destination); // Connect GainNode to destination
+
+        this.loadSound('src/assets/Sounds/lightning2.wav'); // Load your sound file here
+
         this.initLightning();
+    }
+
+    async loadSound(url) {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+    }
+
+    playSound() {
+        if (this.audioBuffer) {
+            const soundSource = this.audioContext.createBufferSource();
+            soundSource.buffer = this.audioBuffer;
+            soundSource.connect(this.gainNode); // Connect sound source to GainNode
+            soundSource.start(0);
+        } else {
+            console.warn("Audio buffer not loaded yet.");
+        }
     }
 
     initLightning() {
@@ -71,18 +94,21 @@ export class LightningEffect {
             lightning.strike.rayParameters.destOffset.copy(position.clone().add(new THREE.Vector3(0, -5, 0)));
         });
     }
+
     setPosition(position) {
         this.lightningMeshes.forEach(({ strike }) => {
             strike.rayParameters.sourceOffset.copy(position);
             strike.rayParameters.destOffset.copy(position.clone().add(new THREE.Vector3(0, -5, 0))); // Adjust end offset as needed
         });
     }
-    
 
     animate(t) {
         this.lightningMeshes.forEach(({ strike, mesh }, index) => {
             strike.update(t + index * 0.2);  // Adding offset to create staggered effect
             mesh.material.opacity = Math.random();  // Random opacity for flicker effect
+
+            // Play sound when lightning is updated
+            this.playSound();
         });
 
         this.composer.render();

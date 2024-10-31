@@ -15,6 +15,7 @@ import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
+
 export default class StartupScene extends Scene {
   constructor(camera, renderer) {
     super(camera);
