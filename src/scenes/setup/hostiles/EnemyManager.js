@@ -7,6 +7,7 @@ export default class EnemyManager {
   constructor(scene, player, collisionManager, gameUI) {
     this.scene = scene;
     this.player = player; // player mesh
+    this.player = player; // player mesh
     this.collisionManager = collisionManager;
     this.gltfLoader = new GLTFLoader();
     this.gameUI = gameUI;
@@ -104,22 +105,10 @@ export default class EnemyManager {
         const zombiePos = zombie.mesh.position;
         let zombieTarget = zombie.targetPos.clone();
         zombieTarget.y = 0;
-        const ZombieGroupID = this.pathFinder.getGroup(
-          this.PathZone,
-          zombiePos
-        );
-        const closestZombieNode = this.pathFinder.getClosestNode(
-          zombiePos,
-          this.PathZone,
-          ZombieGroupID
-        );
+        const ZombieGroupID = this.pathFinder.getGroup(this.PathZone, zombiePos);
+        const closestZombieNode = this.pathFinder.getClosestNode(zombiePos, this.PathZone, ZombieGroupID);
 
-        const path = this.pathFinder.findPath(
-          closestZombieNode.centroid,
-          zombieTarget,
-          this.PathZone,
-          ZombieGroupID
-        );
+        const path = this.pathFinder.findPath(closestZombieNode.centroid, zombieTarget, this.PathZone, ZombieGroupID);
 
         zombie.FollowPath(path);
       }

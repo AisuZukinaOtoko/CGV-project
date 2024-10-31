@@ -131,19 +131,17 @@ export class PlayerManager {
     const horizontalMovement = moveDirection.multiplyScalar(currentSpeed * deltaTime);
     const verticalMovement = new THREE.Vector3(0, this.verticalVelocity * deltaTime, 0);
 
-    this.updatePosition(horizontalMovement, verticalMovement);
+    this.updatePosition(horizontalMovement, verticalMovement, deltaTime);
     this.checkGrounded();
   }
 
-  updatePosition(horizontalMovement, verticalMovement) {
-    // Handle horizontal movement
-    let newPosition = this.playerObject.position.clone().add(horizontalMovement);
+  updatePosition(horizontalMovement, verticalMovement, deltaTime) {
+    let newPosition = this.playerObject.position.clone().add(horizontalMovement.multiplyScalar(deltaTime));
     if (!this.collisionManager.checkCollision(newPosition, this.playerObject.quaternion)) {
       this.playerObject.position.copy(newPosition);
     }
 
-    // Handle vertical movement
-    newPosition = this.playerObject.position.clone().add(verticalMovement);
+    newPosition = this.playerObject.position.clone().add(verticalMovement.multiplyScalar(deltaTime));
     if (!this.collisionManager.checkCollision(newPosition, this.playerObject.quaternion)) {
       this.playerObject.position.copy(newPosition);
     } else {
