@@ -16,8 +16,9 @@ export default class EnemyManager {
     this.PathZone = 'zone';
     this.navmesh = undefined;
     this.groupID = undefined;
+    this.totalPlayerDamage = 0;
 
-    this.zombieNum = 5;
+    this.zombieNum = 1;
     this.SuperZombies = [];
 
     for (let i = 0; i < this.zombieNum; i++) {
@@ -59,6 +60,7 @@ export default class EnemyManager {
     for (const zombie of this.SuperZombies) {
       if (zombie.SetupComplete && this.pathFindingEnabled && !zombie.disposed) {
         zombie.OnUpdate(deltaTime);
+        this.totalPlayerDamage += zombie.playerDamage;
 
         if (zombie.isDead){ // clean up some zombie resources
           zombie.colliders.forEach((collider) => {
@@ -95,7 +97,7 @@ export default class EnemyManager {
       }      
       i++;
     }
-
+    console.log(this.totalPlayerDamage);
   }
 
   // returns true if bullet hit a zombie, false otherwise.
