@@ -18,6 +18,7 @@ export default class StartupScene extends Scene {
   constructor(camera, renderer) {
     super(camera);
     this.gameUI = new GameUI(this);
+    this.isGamePaused = false;  // New property to track pause state
     this.m_Scene = new THREE.Scene();
     this.m_MainCamera = camera;
     this.m_Renderer = renderer;

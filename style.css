@@ -116,7 +116,7 @@ html {
 }
 
 /* Game-over screen */
-#game-over {
+/* #game-over {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -136,4 +136,4 @@ html {
   cursor: pointer;
   font-family: 'Agdasima', sans-serif;
 
-}
+} */
