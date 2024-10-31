@@ -17,6 +17,7 @@ export default class Zombie extends GameEntity {
       this.targetPos = new THREE.Vector3(0, 0, 0);
       this.immediateDestination = new THREE.Vector3(0, 0, 0); // next destination on the path to the target
       this.health = 100;
+      this.legHealth = 50;
       this.sightDistance = 30;
       this.smellDistance = 10;
       this.attackDistance = 3;
@@ -24,6 +25,8 @@ export default class Zombie extends GameEntity {
       this.isAggravated = false;  // Placeholder for when the zombie is aggravated by the player
       this.deltaTime = 0;
       this.isMoving = false;
+      this.isDead = false; // false = still being updated. Animations etc
+      this.disposed = false; // memory cleaned
     }
 
     OnUpdate(delta) {
