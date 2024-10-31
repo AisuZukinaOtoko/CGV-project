@@ -7,13 +7,14 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import EnemyManager from "./hostiles/EnemyManager.js";
 import { CollisionManager } from "./CollisionManager.js";
 import { PlayerManager } from "./PlayerManager.js";
+import { LightningEffect } from './LightningEffect.js';
 import { EnvironmentManager } from "./EnvironmentManager.js";
 import { GunManager } from "./GunManager.js";
 import { GameUI } from "./gameUI.js";
-import { MiniMap } from "./Minimap.js";
 import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
+
 
 export default class StartupScene extends Scene {
   constructor(camera, renderer) {
@@ -24,12 +25,11 @@ export default class StartupScene extends Scene {
     this.m_Renderer = renderer;
     this.environmentCutoffSize = 200;
     this.initializeScene(camera, renderer);
-    this.gameUI = new GameUI(this.m_Scene);
     this.setupManagers();
     this.setupStats();
     this.setupEventListeners();
     this.setupSkybox();
-    this.miniMap = new MiniMap(this.m_Scene, this.playerManager);
+    this.setupLightningAbovePlayer();
   }
 
   initializeScene(camera, renderer) {
@@ -76,15 +76,9 @@ export default class StartupScene extends Scene {
     this.enemyManager = new EnemyManager(
       this.m_Scene,
       this.playerManager.playerObject,
-      this.collisionManager,
-      this.gameUI
+      this.collisionManager
     );
-
-    this.gameUI.setEnemyManager(this.enemyManager);
-
-    this.enemyManager.EnablePathFinding(
-      "src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene-navmesh2.glb"
-    );
+    this.enemyManager.EnablePathFinding('src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene-navmesh2.glb');
   }
 
   setupStats() {
@@ -114,6 +108,14 @@ export default class StartupScene extends Scene {
     ]);
     this.m_Scene.background = texture;
   }
+  setupLightningAbovePlayer() {
+    const playerSpawnPosition = this.playerManager.getPlayerPosition();
+    const lightningPosition = playerSpawnPosition.clone().add(new THREE.Vector3(0, 2, 0));  // Offset lightning above player
+
+    // Initialize and position the lightning effect above the player
+    this.lightningEffect = new LightningEffect(this.m_Scene, this.m_MainCamera, this.m_Renderer);
+    this.lightningEffect.setPosition(lightningPosition);
+  }
 
   handleMouseClick(event) {
     if (document.pointerLockElement === this.m_Renderer.domElement) {
@@ -130,29 +132,27 @@ export default class StartupScene extends Scene {
   }
 
   OnUpdate(deltaTime) {
-    if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)) {
+    const time = performance.now() * 0.001;  // Calculate time in seconds for a smoother effect
+    this.lightningEffect.animate(time);
+    if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)){
       this.m_MainCamera.fov -= 1;
-      if (this.m_MainCamera.fov < 30) {
+      if (this.m_MainCamera.fov < 30){
         this.m_MainCamera.fov = 30;
       }
-    } else {
+    }
+    else {
       this.m_MainCamera.fov += 1;
-      if (this.m_MainCamera.fov > 45) {
+      if (this.m_MainCamera.fov > 45){
         this.m_MainCamera.fov = 45;
       }
     }
 
-    if (Events.eventHandler.IsMouseButtonPressed(Events.MOUSE.LEFT)) {
+    if (Events.eventHandler.IsMouseButtonPressed(Events.MOUSE.LEFT)){
       const direction = new THREE.Vector3();
       const cameraWorldPosition = new THREE.Vector3();
       this.m_MainCamera.getWorldPosition(cameraWorldPosition);
       this.m_MainCamera.getWorldDirection(direction);
-      this.enemyManager.BulletHitCheck(
-        cameraWorldPosition,
-        direction,
-        this.m_MainCamera,
-        20
-      );
+      this.enemyManager.BulletHitCheck(cameraWorldPosition, direction, this.m_MainCamera, 20);
     }
 
     this.m_MainCamera.updateProjectionMatrix();
@@ -162,6 +162,5 @@ export default class StartupScene extends Scene {
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
     this.gunManager.update();
-    this.miniMap.update();
   }
 }

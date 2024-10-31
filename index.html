@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CGV Project</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="./src/GameMenu/style.css" />
+    <link rel="stylesheet" href="./src/GameMenu/style.css">
 
     <style>
       #intro {
@@ -33,6 +33,7 @@
         margin-top: 10px;
       }
     </style>
+    
   </head>
   <body>
     <canvas id="Main-Canvas"></canvas>
@@ -40,34 +41,41 @@
 
     <!-- Game menu start -->
 
-    <!-- Audio  for the background music -->
-    <audio id="menu-sound" src="./src/assets/Sounds/back.wav" loop></audio>
-
-    <section id="intro">
-      <div class="menu">
-        <h1 class="game-title">DeadZone: Survival Rush</h1>
-        <div class="menu-buttons">
-          <button class="menu-btn" id="start-button">Play</button>
-          <button class="menu-btn" id="exit-button">Exit</button>
+      <!-- Audio  for the background music -->
+      <audio id="menu-sound" src="./src/assets/Sounds/back.wav" loop></audio>
+      
+      <section id="intro">
+        <div class="menu"> 
+          <h1 class="game-title">DeadZone: Survival Rush</h1>
+          <div class="menu-buttons"> 
+            <button class="menu-btn" id="start-button">Play</button>
+            <button class="menu-btn" id="exit-button">Exit</button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
     <!-- Game menu end -->
 
     <div class="health-bar" data-total="1000" data-value="1000">
       <div class="bar">
-        <div class="hit"></div>
+          <div class="hit"></div>
       </div>
     </div>
 
     <div id="game-ui">
       <h1 id="timer">04:00</h1>
       <h2 id="kill-counter">KILLS: 0</h2>
-      <div id="mini-map"></div>
     </div>
 
-    <div id="game-over" style="display: none">
+    <div id="damageOverlay"></div>
+
+    <div id="waveOverlay">
+      <span id="waveText">Wave 1</span>
+    </div>
+  
+
+
+    <div id="game-over" style="display: none;">
       <h1>Game Over</h1>
       <button id="restart-button">Restart</button>
     </div>
