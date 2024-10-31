@@ -17,13 +17,19 @@ export default class Zombie extends GameEntity {
       this.targetPos = new THREE.Vector3(0, 0, 0);
       this.immediateDestination = new THREE.Vector3(0, 0, 0); // next destination on the path to the target
       this.health = 100;
+      this.legHealth = 50;
       this.sightDistance = 30;
       this.smellDistance = 10;
       this.attackDistance = 3;
+      this.attackCooldown = false;
       this.speed = 1;
       this.isAggravated = false;  // Placeholder for when the zombie is aggravated by the player
+      this.playerDamage = 0;
       this.deltaTime = 0;
       this.isMoving = false;
+      this.noPath = false; // true if no path to destination is found -> zombie to idle
+      this.isDead = false; // false = still being updated. Animations etc
+      this.disposed = false; // memory cleaned
     }
 
     OnUpdate(delta) {
@@ -39,19 +45,37 @@ export default class Zombie extends GameEntity {
       }
       else {
         pathTarget = path[0];
+        this.noPath = false;
         this.immediateDestination = pathTarget;
       }
 
-      const distance = pathTarget.clone().sub(this.mesh.position);
+      var distance = pathTarget.clone().sub(this.mesh.position);
 
-      if (distance.lengthSq() > this.speed){
+      if (distance.lengthSq() > this.speed * 0.01){
         distance.normalize();
         this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
         this.LookAt(pathTarget);
         //this.mesh.rotation.x = 0; // remove later
-      } else{
-        if (path)
-          path.shift();
+      } else{ // move on to next node in the path
+        this.mesh.position.copy(pathTarget);
+        if (!path){
+          this.noPath = true;
+          return;
+        }
+        
+        path.shift();
+        if (path.length == 0){
+          this.noPath = true;
+          return;
+        }
+        
+        pathTarget = path[0];
+        distance = pathTarget.clone().sub(this.mesh.position);
+        distance.normalize();
+        this.mesh.position.add(distance.multiplyScalar(0.5));
+        //this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
+        this.LookAt(pathTarget);
+        console.log(distance);
       }
     }
 

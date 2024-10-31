@@ -146,6 +146,15 @@ export default class StartupScene extends Scene {
         this.m_MainCamera.fov = 45;
       }
     }
+
+    if (Events.eventHandler.IsMouseButtonPressed(Events.MOUSE.LEFT)){
+      const direction = new THREE.Vector3();
+      const cameraWorldPosition = new THREE.Vector3();
+      this.m_MainCamera.getWorldPosition(cameraWorldPosition);
+      this.m_MainCamera.getWorldDirection(direction);
+      this.enemyManager.BulletHitCheck(cameraWorldPosition, direction, this.m_MainCamera, 20);
+    }
+
     this.m_MainCamera.updateProjectionMatrix();
     this.stats.update();
     this.gameUI.update();
