@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import StartScene from "./scenes/setup/StartupScene.js";
-
 export default class Game {
   constructor() {
     this.m_MainCamera = new THREE.PerspectiveCamera(

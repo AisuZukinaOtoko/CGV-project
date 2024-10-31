@@ -7,12 +7,14 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import EnemyManager from "./hostiles/EnemyManager.js";
 import { CollisionManager } from "./CollisionManager.js";
 import { PlayerManager } from "./PlayerManager.js";
+import { LightningEffect } from './LightningEffect.js';
 import { EnvironmentManager } from "./EnvironmentManager.js";
 import { GunManager } from "./GunManager.js";
 import { GameUI } from "./gameUI.js";
 import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
+
 
 export default class StartupScene extends Scene {
   constructor(camera, renderer) {
@@ -27,6 +29,7 @@ export default class StartupScene extends Scene {
     this.setupStats();
     this.setupEventListeners();
     this.setupSkybox();
+    this.setupLightningAbovePlayer();
   }
 
   initializeScene(camera, renderer) {
@@ -105,6 +108,14 @@ export default class StartupScene extends Scene {
     ]);
     this.m_Scene.background = texture;
   }
+  setupLightningAbovePlayer() {
+    const playerSpawnPosition = this.playerManager.getPlayerPosition();
+    const lightningPosition = playerSpawnPosition.clone().add(new THREE.Vector3(0, 2, 0));  // Offset lightning above player
+
+    // Initialize and position the lightning effect above the player
+    this.lightningEffect = new LightningEffect(this.m_Scene, this.m_MainCamera, this.m_Renderer);
+    this.lightningEffect.setPosition(lightningPosition);
+  }
 
   handleMouseClick(event) {
     if (document.pointerLockElement === this.m_Renderer.domElement) {
@@ -121,6 +132,8 @@ export default class StartupScene extends Scene {
   }
 
   OnUpdate(deltaTime) {
+    const time = performance.now() * 0.001;  // Calculate time in seconds for a smoother effect
+    this.lightningEffect.animate(time);
     if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)){
       this.m_MainCamera.fov -= 1;
       if (this.m_MainCamera.fov < 30){
