@@ -24,6 +24,7 @@ export class LightningEffect {
         this.loadSound('src/assets/Sounds/lightning2.wav'); // Load your sound file here
 
         this.initLightning();
+        setInterval(() => this.triggerLightning(), 10000); // Strike every 10 seconds
     }
 
     async loadSound(url) {
@@ -82,6 +83,21 @@ export class LightningEffect {
         this.composer.addPass(outlinePass);
     }
 
+
+    triggerLightning() {
+        this.lightningMeshes.forEach(({ mesh }) => {
+            mesh.visible = true;  // Make the lightning visible
+        });
+        this.playSound(); // Play the sound effect
+    
+        // Hide lightning after short delay (e.g., 200ms for flash effect)
+        setTimeout(() => {
+            this.lightningMeshes.forEach(({ mesh }) => {
+                mesh.visible = false;
+            });
+        }, 200);
+    }
+
     setPositions(positions) {
         if (positions.length !== this.lightningMeshes.length) {
             console.warn("Positions array length does not match number of lightning meshes.");
@@ -96,11 +112,14 @@ export class LightningEffect {
     }
 
     setPosition(position) {
+        const highAbovePosition = position.clone().add(new THREE.Vector3(0, 50, 0)); // Adjust 50 to any height you prefer
+    
         this.lightningMeshes.forEach(({ strike }) => {
-            strike.rayParameters.sourceOffset.copy(position);
-            strike.rayParameters.destOffset.copy(position.clone().add(new THREE.Vector3(0, -5, 0))); // Adjust end offset as needed
+            strike.rayParameters.sourceOffset.copy(highAbovePosition); // Start point high above
+            strike.rayParameters.destOffset.copy(position); // End point at ground level
         });
     }
+    
 
     animate(t) {
         this.lightningMeshes.forEach(({ strike, mesh }, index) => {

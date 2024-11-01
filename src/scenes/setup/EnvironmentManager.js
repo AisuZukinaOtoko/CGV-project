@@ -13,7 +13,7 @@ export class EnvironmentManager {
 
   setupEnvironment() {
     new GLTFLoader().load(
-      "src/assets/Environment/polygonal_apocalyptic_urban_ruins/flat-scene.glb",
+      "src/assets/Environment/Chapel/Whitechapel.glb",
       (gltf) => {
         const environment = gltf.scene;
         environment.scale.set(1, 1, 1);
@@ -81,14 +81,44 @@ export class EnvironmentManager {
     }
   }
 
+  // Update setupLights to store lampLight
   setupLights() {
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.1));
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 0.2);
     sunLight.position.set(100, 100, 100);
     sunLight.castShadow = true;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 500;
-    sunLight.shadow.bias = -0.0001;
     this.scene.add(sunLight);
+
+    // Set up the flickering lamp light
+    this.lampLight = new THREE.PointLight(0xffd700, 5, 20);
+    this.lampLight.position.set(-18.2, 3.0, 8.5); 
+    this.lampLight.castShadow = true;
+
+    const bulbGeometry = new THREE.SphereGeometry(0.1, 8, 4);
+    const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700, emissive: 0xffd700 });
+    const bulbMesh = new THREE.Mesh(bulbGeometry, bulbMaterial);
+
+    bulbMesh.position.set(-18.2, 3.0, 8.5);
+    this.scene.add(bulbMesh);
+    this.scene.add(this.lampLight);
+
+    const lightHelper = new THREE.PointLightHelper(this.lampLight, 0.5);
+    this.scene.add(lightHelper);
+}
+
+animate() {
+  if (this.lampLight) {
+      // Set the light off occasionally (e.g., 20% chance per frame)
+      const flickerOff = Math.random() < 0.2;
+
+      if (flickerOff) {
+          this.lampLight.intensity = 0; // Turn light off
+      } else {
+          this.lampLight.intensity = 5 + Math.random() * 0.5;
+      }
   }
+}
+
+
 }

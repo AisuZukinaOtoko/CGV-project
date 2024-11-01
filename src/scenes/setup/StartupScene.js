@@ -30,7 +30,7 @@ export default class StartupScene extends Scene {
     this.setupStats();
     this.setupEventListeners();
     this.setupSkybox();
-    this.setupLightningAbovePlayer();
+    this.setupLightning();
   }
 
   initializeScene(camera, renderer) {
@@ -109,7 +109,7 @@ export default class StartupScene extends Scene {
     ]);
     this.m_Scene.background = texture;
   }
-  setupLightningAbovePlayer() {
+  setupLightning() {
     const playerSpawnPosition = this.playerManager.getPlayerPosition();
     const lightningPosition = playerSpawnPosition.clone().add(new THREE.Vector3(0, 2, 0));  // Offset lightning above player
 
@@ -163,5 +163,6 @@ export default class StartupScene extends Scene {
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
     this.gunManager.update();
+    this.environmentManager.animate();
   }
 }
