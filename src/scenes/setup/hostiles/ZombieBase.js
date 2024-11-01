@@ -75,7 +75,7 @@ export default class Zombie extends GameEntity {
         this.mesh.position.add(distance.multiplyScalar(0.5));
         //this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
         this.LookAt(pathTarget);
-        console.log(distance);
+        //console.log(distance);
       }
     }
 
