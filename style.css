@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&display=swap");
 
 body,
 html {
@@ -46,7 +46,7 @@ html {
   box-sizing: border-box;
   position: fixed;
   bottom: 40px;
-  left:40px;
+  left: 40px;
   width: 300px;
   width: 15.5%;
   height: 30px;
@@ -61,29 +61,28 @@ html {
   background: #c54;
   width: 100%;
   height: 20px;
-  
 
-  transition: width .5s linear;
+  transition: width 0.5s linear;
 }
 
 .hit {
-  background: rgba(255,255,255,0.6);
+  background: rgba(255, 255, 255, 0.6);
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   width: 0px;
-  
-  transition: width .5s linear;
+
+  transition: width 0.5s linear;
 }
 
 #gun-icon {
   bottom: 40px;
-  left:90%;
+  left: 90%;
   width: 50px;
   height: 50px;
   margin-right: 10px;
-  background-image: url('src/assets/icons/icon-gun.png');
+  background-image: url("src/assets/icons/icon-gun.png");
   background-size: contain;
   background-repeat: no-repeat;
   position: fixed;
@@ -103,7 +102,7 @@ html {
   top: 80px;
   left: 40px;
   color: #c54;
-  font-family: 'Agdasima', sans-serif;
+  font-family: "Agdasima", sans-serif;
 }
 
 #timer {
@@ -114,6 +113,71 @@ html {
 #kill-counter {
   font-size: 200%;
   margin: 0;
+}
+
+#damageOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+
+  /* Enhanced blood-red gradient effect on all edges */
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 0, 0, 0) 50%,
+    /* Transparent center */ rgba(139, 0, 0, 0.3) 70%,
+    /* Light red closer to the center */ rgba(139, 0, 0, 0.8) 85%,
+    /* Darker red toward the edges */ rgba(139, 0, 0, 0.95) 95%,
+    /* Dark red at the top and bottom */ rgba(0, 0, 0, 1) 100%
+      /* Black at the extreme edges */
+  );
+}
+
+#waveOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark overlay */
+  backdrop-filter: blur(8px); /* Blurred background effect */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10; /* Ensure it appears above other elements */
+}
+
+#waveText {
+  font-family: "Rubik Wet Paint", cursive;
+  color: #ff0000; /* Bright red for visibility */
+  font-size: 4rem; /* Adjust as needed */
+  text-align: center;
+}
+
+#mini-map {
+  position: fixed;
+  bottom: 100px;
+  left: 40px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px solid #c54;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 100;
+}
+
+#mini-map-canvas {
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
 }
 
 /* Game-over screen */
@@ -138,4 +202,3 @@ html {
   font-family: 'Agdasima', sans-serif;
 
 } */
-

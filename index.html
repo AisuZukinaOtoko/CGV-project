@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CGV Project</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="./src/GameMenu/style.css">
+    <link rel="stylesheet" href="./src/GameMenu/style.css" />
 
     <style>
       /* Loading screen styles */
@@ -24,7 +24,6 @@
         font-size: 1.5em;
         z-index: 10000;
       }
-
 
       #lds-facebook {
         color: white;
@@ -64,14 +63,16 @@
           top: 8px;
           height: 64px;
         }
-        50%, 100% {
+        50%,
+        100% {
           top: 24px;
           height: 32px;
         }
       }
 
       /* Styles for the audio and controls buttons */
-      #audio-button, #controls-button{
+      #audio-button,
+      #controls-button {
         margin: 5px;
       }
 
@@ -90,7 +91,7 @@
         color: white;
         z-index: 1000;
         width: 300px;
-        font-size: 1.2em; 
+        font-size: 1.2em;
       }
 
       .popup.hidden {
@@ -117,7 +118,8 @@
         cursor: pointer;
       }
 
-      #intro.hidden {
+      #intro.hidden,
+      #loading-screen.hidden {
         display: none; /* Hide the overlay when not needed */
       }
 
@@ -163,7 +165,8 @@
         display: none; /* Hide the overlay when not needed */
       }
 
-      #game-over-title, #kill-counter{
+      #game-over-title,
+      #kill-counter {
         color: red;
       }
 
@@ -171,12 +174,15 @@
         margin-top: 10px;
       }
     </style>
-    
   </head>
   <body>
     <!-- Loading Screen -->
-    <section id="loading-screen">
-      <div id="lds-facebook"><div></div><div></div><div></div></div>
+    <section id="loading-screen" class="hidden">
+      <div id="lds-facebook">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
     </section>
 
     <canvas id="Main-Canvas"></canvas>
@@ -184,45 +190,45 @@
 
     <!-- Game menu start -->
 
-      <!-- Audio  for the background music -->
-      <audio id="menu-sound" src="./src/assets/Sounds/back.wav" loop></audio>
-      
-      <section id="intro">
-        <div class="menu"> 
-          <h1 class="game-title">DeadZone: Survival Rush</h1>
-          <div class="menu-buttons"> 
-            <button class="menu-btn" id="start-button">Rush</button>
-            <button class="menu-btn" id="controls-button">Controls</button>
-            <button class="menu-btn" id="audio-settings-button">Audio</button>
-            <button class="menu-btn" id="restart-button1">Restart</button>
-            <button class="menu-btn" id="exit-button">Exit</button>
-          </div>
-        </div>
-      </section>
+    <!-- Audio  for the background music -->
+    <audio id="menu-sound" src="./src/assets/Sounds/back.wav" loop></audio>
 
-      <!-- Game-Over menu start -->
-        <section id="Game-over" class="hidden">
-          <div class="menu"> 
-            <h1 class="game-title" id="game-over-title">You died</h1>
-            <div class="menu-buttons"> 
-              <button class="menu-btn" id="restart-button2">Restart</button>
-              <button class="menu-btn" id="exit-button1">Exit</button>
-            </div>
-          </div>
-        </section>
-      <!-- Game-Over menu end -->
-
-      <!-- Game-Over1 menu start -->
-      <section id="Game-over1" class="hidden">
-        <div class="menu"> 
-          <h1 class="game-title">Rush completed</h1>
-          <h2 id="kill-counter">KILLS: 0</h2>
-          <div class="menu-buttons"> 
-            <button class="menu-btn" id="restart-button3">Restart</button>
-            <button class="menu-btn" id="exit-button2">Exit</button>
-          </div>
+    <section id="intro">
+      <div class="menu">
+        <h1 class="game-title">DeadZone: Survival Rush</h1>
+        <div class="menu-buttons">
+          <button class="menu-btn" id="start-button">Rush</button>
+          <button class="menu-btn" id="controls-button">Controls</button>
+          <button class="menu-btn" id="audio-settings-button">Audio</button>
+          <button class="menu-btn" id="restart-button1">Restart</button>
+          <button class="menu-btn" id="exit-button">Exit</button>
         </div>
-      </section>
+      </div>
+    </section>
+
+    <!-- Game-Over menu start -->
+    <section id="Game-over" class="hidden">
+      <div class="menu">
+        <h1 class="game-title" id="game-over-title">You died</h1>
+        <div class="menu-buttons">
+          <button class="menu-btn" id="restart-button2">Restart</button>
+          <button class="menu-btn" id="exit-button1">Exit</button>
+        </div>
+      </div>
+    </section>
+    <!-- Game-Over menu end -->
+
+    <!-- Game-Over1 menu start -->
+    <section id="Game-over1" class="hidden">
+      <div class="menu">
+        <h1 class="game-title">Rush completed</h1>
+        <h2 id="kill-counter">KILLS: 0</h2>
+        <div class="menu-buttons">
+          <button class="menu-btn" id="restart-button3">Restart</button>
+          <button class="menu-btn" id="exit-button2">Exit</button>
+        </div>
+      </div>
+    </section>
     <!-- Game-Over1 menu end -->
 
     <!-- Game menu end -->
@@ -254,36 +260,32 @@
 
     <div class="health-bar" data-total="1000" data-value="1000">
       <div class="bar">
-          <div class="hit"></div>
+        <div class="hit"></div>
       </div>
     </div>
 
     <div id="game-ui">
-      <h1 id="timer">04:00</h1>
+      <h1 id="timer">04:15</h1>
       <h2 id="kill-counter">KILLS: 0</h2>
+      <div id="mini-map"></div>
     </div>
 
     <script>
       // Delay duration in milliseconds (e.g., 3000ms = 3 seconds)
-      const loadingDelay = 4000;
+      const loadingDelay = 15000;
 
-      window.addEventListener('load', function () {
+      window.addEventListener("load", function () {
         // Keep the loading screen visible for a set amount of time
         setTimeout(function () {
-          document.getElementById('loading-screen').style.display = 'none';
+          document.getElementById("loading-screen").style.display = "none";
         }, loadingDelay);
       });
     </script>
 
-    <!-- Whenever I comment lines 160 - 164 the game glitches. Gael -->
+    <div id="damageOverlay"></div>
 
-    <div id="game-over" style="display: none;">
-      <h1>Game Over</h1>
-      <button id="restart-button">Restart</button>
+    <div id="waveOverlay">
+      <span id="waveText">Wave 1</span>
     </div>
-    <!-- <div id="ammo-counter">
-      <div id="gun-icon"></div>
-      <div id="ammo-count">90 / 90</div>
-    </div> -->
   </body>
 </html>

@@ -1,5 +1,4 @@
 import Scene from "../Scene.js";
-import EVENTS from "../../Events.js";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
@@ -7,29 +6,33 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import EnemyManager from "./hostiles/EnemyManager.js";
 import { CollisionManager } from "./CollisionManager.js";
 import { PlayerManager } from "./PlayerManager.js";
-import { LightningEffect } from './LightningEffect.js';
+import { LightningEffect } from "./LightningEffect.js";
 import { EnvironmentManager } from "./EnvironmentManager.js";
 import { GunManager } from "./GunManager.js";
 import { GameUI } from "./gameUI.js";
+import { MiniMap } from "./Minimap.js";
+import { PostProcessor } from "../../PostProcessing.js";
 import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
-
 
 export default class StartupScene extends Scene {
   constructor(camera, renderer) {
     super(camera);
     this.gameUI = new GameUI(this);
-    this.isGamePaused = false;  // New property to track pause state
+    this.isGamePaused = false; // New property to track pause state
     this.m_Scene = new THREE.Scene();
+    this.postProcessor = new PostProcessor(this.scene, renderer, camera);
     this.m_MainCamera = camera;
     this.m_Renderer = renderer;
     this.environmentCutoffSize = 200;
     this.initializeScene(camera, renderer);
+    this.gameUI = new GameUI(this.m_Scene);
     this.setupManagers();
     this.setupStats();
     this.setupEventListeners();
     this.setupSkybox();
+    this.miniMap = new MiniMap(this.m_Scene, this.playerManager);
     this.setupLightningAbovePlayer();
   }
 
@@ -77,9 +80,15 @@ export default class StartupScene extends Scene {
     this.enemyManager = new EnemyManager(
       this.m_Scene,
       this.playerManager.playerObject,
-      this.collisionManager
+      this.collisionManager,
+      this.gameUI
     );
-    this.enemyManager.EnablePathFinding('src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene-navmesh2.glb');
+
+    this.gameUI.setEnemyManager(this.enemyManager);
+
+    this.enemyManager.EnablePathFinding(
+      "src/assets/Environment/chapel/Whitechapel-navmesh.glb"
+    );
   }
 
   setupStats() {
@@ -111,10 +120,16 @@ export default class StartupScene extends Scene {
   }
   setupLightningAbovePlayer() {
     const playerSpawnPosition = this.playerManager.getPlayerPosition();
-    const lightningPosition = playerSpawnPosition.clone().add(new THREE.Vector3(0, 2, 0));  // Offset lightning above player
+    const lightningPosition = playerSpawnPosition
+      .clone()
+      .add(new THREE.Vector3(0, 2, 0)); // Offset lightning above player
 
     // Initialize and position the lightning effect above the player
-    this.lightningEffect = new LightningEffect(this.m_Scene, this.m_MainCamera, this.m_Renderer);
+    this.lightningEffect = new LightningEffect(
+      this.m_Scene,
+      this.m_MainCamera,
+      this.m_Renderer
+    );
     this.lightningEffect.setPosition(lightningPosition);
   }
 
@@ -133,28 +148,35 @@ export default class StartupScene extends Scene {
   }
 
   OnUpdate(deltaTime) {
-    const time = performance.now() * 0.001;  // Calculate time in seconds for a smoother effect
-    this.lightningEffect.animate(time);
-    if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)){
+    deltaTime = Math.min(deltaTime, 0.5);
+    const time = performance.now() * 0.001; // Calculate time in seconds for a smoother effect
+    //this.lightningEffect.animate(time);
+    if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)) {
       this.m_MainCamera.fov -= 1;
-      if (this.m_MainCamera.fov < 30){
+      if (this.m_MainCamera.fov < 30) {
         this.m_MainCamera.fov = 30;
       }
-    }
-    else {
+    } else {
       this.m_MainCamera.fov += 1;
-      if (this.m_MainCamera.fov > 45){
+      if (this.m_MainCamera.fov > 45) {
         this.m_MainCamera.fov = 45;
       }
     }
 
-    if (Events.eventHandler.IsMouseButtonPressed(Events.MOUSE.LEFT)){
+    if (Events.eventHandler.IsMouseButtonPressed(Events.MOUSE.LEFT)) {
       const direction = new THREE.Vector3();
       const cameraWorldPosition = new THREE.Vector3();
       this.m_MainCamera.getWorldPosition(cameraWorldPosition);
       this.m_MainCamera.getWorldDirection(direction);
-      this.enemyManager.BulletHitCheck(cameraWorldPosition, direction, this.m_MainCamera, 20);
+      this.enemyManager.BulletHitCheck(
+        cameraWorldPosition,
+        direction,
+        this.m_MainCamera,
+        20
+      );
     }
+
+    if (!this.environmentManager.environmentSetup) return;
 
     this.m_MainCamera.updateProjectionMatrix();
     this.stats.update();
@@ -163,5 +185,15 @@ export default class StartupScene extends Scene {
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
     this.gunManager.update();
+    this.miniMap.update();
+    this.postProcessor.OnUpdate(deltaTime);
+  }
+
+  OnPreRender() {
+    if (this.enemyManager.totalPlayerDamage > 0) {
+      this.enemyManager.totalPlayerDamage = 0;
+      this.postProcessor.ShakeCamera(0.25, 0.05);
+      this.postProcessor.PlayerDamageAnimation(200);
+    }
   }
 }

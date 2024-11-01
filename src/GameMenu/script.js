@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const loadingDelay = 20000; // make this match the one in index,html
+
+  // Select the loading screen and start button
+  const loadingScreen = document.getElementById("loading-screen");
+
   const intro = document.getElementById("intro");
   const gameOver = document.getElementById("Game-over");
   const gameCompleted = document.getElementById("Game-over1");
@@ -27,7 +32,20 @@ document.addEventListener("DOMContentLoaded", () => {
   let isGamePaused = false; // Track the pause state
   let gameStarted = false; // Track if the game has been started at least once
   let isAudioMuted = false;
-  
+
+  // Start button event listener to display the loading screen
+  startButton.addEventListener("click", function () {
+    // Display the loading screen
+    loadingScreen.classList.remove("hidden");
+
+    // Hide the loading screen after the delay and start the game
+    setTimeout(() => {
+      loadingScreen.classList.add("hidden");
+      startGame(); // Replace with your actual game start function
+      //userInterface.resumeTimer();
+    }, loadingDelay);
+  });
+
   // Function to play menu sound
   function playIntroSound() {
     if (menuSound) {
@@ -71,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     audioPopup.classList.add("hidden");
   }
 
-  function restartGame() {  
+  function restartGame() {
     // Fallback: Reload the entire page if the game module isn't available or if a full refresh is needed
     location.reload();
   }
@@ -147,7 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.close();
   }
 
-
   // Event listener for starting the game when the start button is clicked resume-button
   startButton.addEventListener("click", startGame);
   restartButton.addEventListener("click", restartGame);
@@ -180,14 +197,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Event listener for pressing 'ESC' to toggle between pause and resume
   document.addEventListener("keydown", (event) => {
     if (event.key === "q" || event.key === "Q") {
-        showGameOver(); // Pause the game if it was running
+      showGameOver(); // Pause the game if it was running
     }
   });
 
   // Event listener for pressing 'ESC' to toggle between pause and resume
   document.addEventListener("keydown", (event) => {
     if (event.key === "e" || event.key === "E") {
-        showGameCompleted(); // Pause the game if it was running
+      showGameCompleted(); // Pause the game if it was running
     }
   });
 
