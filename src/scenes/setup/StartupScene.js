@@ -1,5 +1,4 @@
 import Scene from "../Scene.js";
-import EVENTS from "../../Events.js";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
@@ -11,6 +10,7 @@ import { LightningEffect } from './LightningEffect.js';
 import { EnvironmentManager } from "./EnvironmentManager.js";
 import { GunManager } from "./GunManager.js";
 import { GameUI } from "./gameUI.js";
+import { PostProcessor } from "../../PostProcessing.js"
 import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
@@ -22,6 +22,7 @@ export default class StartupScene extends Scene {
     this.gameUI = new GameUI(this);
     this.isGamePaused = false;  // New property to track pause state
     this.m_Scene = new THREE.Scene();
+    this.postProcessor = new PostProcessor(this.scene, renderer, camera);
     this.m_MainCamera = camera;
     this.m_Renderer = renderer;
     this.environmentCutoffSize = 200;
@@ -167,5 +168,14 @@ export default class StartupScene extends Scene {
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
     this.gunManager.update();
+  }
+
+  OnPreRender() {
+    if (this.enemyManager.totalPlayerDamage > 0){
+      console.log("damage player!!!!!!", this.enemyManager.totalPlayerDamage);
+      this.enemyManager.totalPlayerDamage = 0;
+      this.postProcessor.ShakeCamera(100, 3);
+      this.postProcessor.PlayerDamageAnimation(200);
+    }
   }
 }

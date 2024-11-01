@@ -36,7 +36,7 @@ export class IdleState extends State {
             return;
         }
 
-        console.log(zombie.noPath);
+        //console.log(zombie.noPath);
         if (zombie.CanSeePlayer() && !zombie.noPath){
             zombie.stateMachine.changeTo(AGGRAVATED);
             return;
