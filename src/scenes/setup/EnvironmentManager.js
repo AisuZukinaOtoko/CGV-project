@@ -9,11 +9,12 @@ export class EnvironmentManager {
     this.collidableMeshList = [];
     this.setupEnvironment();
     this.setupLights();
+    this.environmentSetup = false;
   }
 
   setupEnvironment() {
     new GLTFLoader().load(
-      "src/assets/Environment/polygonal_apocalyptic_urban_ruins/flat-scene.glb",
+      "src/assets/Environment/chapel/Whitechapel.glb",
       (gltf) => {
         const environment = gltf.scene;
         environment.scale.set(1, 1, 1);
@@ -44,6 +45,7 @@ export class EnvironmentManager {
             this.setupNode(node);
           }
         });
+        this.environmentSetup = true;
       },
       undefined,
       (error) => console.error("Error loading environment:", error)

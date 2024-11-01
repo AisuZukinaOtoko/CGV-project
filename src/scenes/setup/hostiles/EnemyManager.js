@@ -22,7 +22,7 @@ export default class EnemyManager {
     this.SuperZombies = [];
 
     for (let i = 0; i < this.zombieNum; i++) {
-      const initialPosition = new THREE.Vector3(6 * i, 0, -15);
+      const initialPosition = new THREE.Vector3(6, 0, 6);
       const zombie = new SuperZombie(this.scene, this.collisionManager, initialPosition, this.player.position);
       this.SuperZombies.push(zombie);
     }

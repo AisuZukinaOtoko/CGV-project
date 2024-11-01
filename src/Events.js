@@ -235,6 +235,11 @@ const KEY = {
   EIGHT: "8",
   NINE: "9",
   ZERO: "0",
+  SHIFT: 'Shift',
+  TAB: 'Tab',
+  CAPS: 'CapsLock',
+  CTRL: 'Control',
+  ALT: 'Alt',
   ANY: "Any",
 };
 
