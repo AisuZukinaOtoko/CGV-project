@@ -17,7 +17,7 @@ export class PlayerManager {
 
   setupPlayer() {
     this.playerObject = new THREE.Object3D();
-    this.playerObject.position.set(0, 2, 5);
+    this.playerObject.position.set(5, 2, 5);
     this.scene.add(this.playerObject);
     this.playerObject.add(this.camera);
     this.camera.position.set(0, 0, 0);

@@ -79,7 +79,7 @@ export default class StartupScene extends Scene {
       this.playerManager.playerObject,
       this.collisionManager
     );
-    this.enemyManager.EnablePathFinding('src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene-navmesh2.glb');
+    this.enemyManager.EnablePathFinding('src/assets/Environment/chapel/Whitechapel-navmesh.glb');
   }
 
   setupStats() {
@@ -133,8 +133,9 @@ export default class StartupScene extends Scene {
   }
 
   OnUpdate(deltaTime) {
+    deltaTime = Math.min(deltaTime, 0.5);
     const time = performance.now() * 0.001;  // Calculate time in seconds for a smoother effect
-    this.lightningEffect.animate(time);
+    //this.lightningEffect.animate(time);
     if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)){
       this.m_MainCamera.fov -= 1;
       if (this.m_MainCamera.fov < 30){
@@ -155,6 +156,9 @@ export default class StartupScene extends Scene {
       this.m_MainCamera.getWorldDirection(direction);
       this.enemyManager.BulletHitCheck(cameraWorldPosition, direction, this.m_MainCamera, 20);
     }
+
+    if (!this.environmentManager.environmentSetup)
+      return;
 
     this.m_MainCamera.updateProjectionMatrix();
     this.stats.update();
