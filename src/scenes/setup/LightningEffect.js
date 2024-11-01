@@ -21,7 +21,7 @@ export class LightningEffect {
         this.gainNode.gain.value = 0.1; // Set initial volume (0.0 to 1.0)
         this.gainNode.connect(this.audioContext.destination); // Connect GainNode to destination
 
-        this.loadSound('src/assets/Sounds/lightning2.wav'); // Load your sound file here
+        this.loadSound('src/assets/Sounds/thunder.mp3'); // Load your sound file here
 
         this.initLightning();
         setInterval(() => this.triggerLightning(), 10000); // Strike every 10 seconds
@@ -83,7 +83,6 @@ export class LightningEffect {
         this.composer.addPass(outlinePass);
     }
 
-
     triggerLightning() {
         this.lightningMeshes.forEach(({ mesh }) => {
             mesh.visible = true;  // Make the lightning visible
@@ -119,15 +118,11 @@ export class LightningEffect {
             strike.rayParameters.destOffset.copy(position); // End point at ground level
         });
     }
-    
 
     animate(t) {
         this.lightningMeshes.forEach(({ strike, mesh }, index) => {
             strike.update(t + index * 0.2);  // Adding offset to create staggered effect
             mesh.material.opacity = Math.random();  // Random opacity for flicker effect
-
-            // Play sound when lightning is updated
-            this.playSound();
         });
 
         this.composer.render();

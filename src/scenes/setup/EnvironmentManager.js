@@ -9,6 +9,9 @@ export class EnvironmentManager {
     this.collidableMeshList = [];
     this.setupEnvironment();
     this.setupLights();
+        // Load sound
+        this.flickerSound = new Audio('src/assets/Sounds/bulb.mp3'); // Replace with your sound file path
+        this.flickerSound.volume = 0.8; // Set volume (0 to 1)
   }
 
   setupEnvironment() {
@@ -116,6 +119,11 @@ animate() {
           this.lampLight.intensity = 0; // Turn light off
       } else {
           this.lampLight.intensity = 5 + Math.random() * 0.5;
+           // Play sound if lamp is flickering
+        if (this.lampLight.intensity > 0 && !this.flickerSound.paused) {
+          this.flickerSound.currentTime = 0; // Reset sound playback
+        }
+        this.flickerSound.play(); // Play sound if the lamp is flickering
       }
   }
 }
