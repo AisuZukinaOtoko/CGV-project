@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const loadingDelay = 6000; // make this match the one in index,html
+  const loadingDelay = 20000; // make this match the one in index,html
 
   // Select the loading screen and start button
   const loadingScreen = document.getElementById('loading-screen');

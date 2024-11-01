@@ -9,7 +9,7 @@ export class GameUI {
 
       this.startButton = document.getElementById("start-button");
 
-      this.timeRemaining = 240; // 4 minutes in seconds
+      this.timeRemaining = 255; // 4 minutes in seconds
       this.kills = 0;
       this.timerInterval = null;
       this.currentWave = 1;
@@ -86,7 +86,10 @@ export class GameUI {
 
   checkForNextWave() {
       // Show the wave overlay based on the time remaining
-      if (this.timeRemaining === 180 && this.currentWave === 1) {
+      if (this.timeRemaining === 240) {
+        this.pauseForNextWave(1);
+      }
+      else if (this.timeRemaining === 180 && this.currentWave === 1) {
           this.pauseForNextWave(2);
       } else if (this.timeRemaining === 120 && this.currentWave === 2) {
           this.pauseForNextWave(3);
