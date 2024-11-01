@@ -116,6 +116,28 @@ html {
   margin: 0;
 }
 
+#damageOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+
+  /* Enhanced blood-red gradient effect on all edges */
+  background: radial-gradient(
+      circle at center,
+      rgba(255, 0, 0, 0) 50%,          /* Transparent center */
+      rgba(139, 0, 0, 0.3) 70%,        /* Light red closer to the center */
+      rgba(139, 0, 0, 0.8) 85%,        /* Darker red toward the edges */
+      rgba(139, 0, 0, 0.95) 95%,       /* Dark red at the top and bottom */
+      rgba(0, 0, 0, 1) 100%            /* Black at the extreme edges */
+  );
+}
+
+
 /* Game-over screen */
 /* #game-over {
   position: absolute;
