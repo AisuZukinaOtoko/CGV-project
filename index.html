@@ -117,7 +117,7 @@
         cursor: pointer;
       }
 
-      #intro.hidden {
+      #intro.hidden, #loading-screen.hidden {
         display: none; /* Hide the overlay when not needed */
       }
 
@@ -170,12 +170,12 @@
       #exit-button {
         margin-top: 10px;
       }
-    </style>
+    </style>  
     
   </head>
   <body>
     <!-- Loading Screen -->
-    <section id="loading-screen">
+    <section id="loading-screen" class="hidden">
       <div id="lds-facebook"><div></div><div></div><div></div></div>
     </section>
 
@@ -274,15 +274,12 @@
         }, loadingDelay);
       });
     </script>
-
-    <!-- Whenever I comment lines 160 - 164 the game glitches. Gael -->
-
-    <div id="game-over" style="display: none;">
-      <h1>Game Over</h1>
-      <button id="restart-button">Restart</button>
-    </div>
     
     <div id="damageOverlay"></div>
+
+    <div id="waveOverlay">
+      <span id="waveText">Wave 1</span>
+    </div>
 
   </body>
 </html>

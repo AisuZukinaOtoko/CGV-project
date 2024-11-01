@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const loadingDelay = 6000; // make this match the one in index,html
+
+  // Select the loading screen and start button
+  const loadingScreen = document.getElementById('loading-screen');
+
   const intro = document.getElementById("intro");
   const gameOver = document.getElementById("Game-over");
   const gameCompleted = document.getElementById("Game-over1");
@@ -28,6 +33,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let gameStarted = false; // Track if the game has been started at least once
   let isAudioMuted = false;
   
+  // Start button event listener to display the loading screen
+  startButton.addEventListener('click', function () {
+    // Display the loading screen
+    loadingScreen.classList.remove('hidden');
+
+    // Hide the loading screen after the delay and start the game
+    setTimeout(() => {
+      loadingScreen.classList.add('hidden');
+      startGame(); // Replace with your actual game start function
+      userInterface.resumeTimer();
+    }, loadingDelay);
+  });
+
   // Function to play menu sound
   function playIntroSound() {
     if (menuSound) {
@@ -80,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function startGame() {
     intro.style.display = "none"; // Hide intro screen
     stopIntroSound(); // Stop the menu sound when the game starts
-
+    
     if (isGamePaused && gameModule) {
       // Resume the game if it's paused
       gameModule.resumeGame();
