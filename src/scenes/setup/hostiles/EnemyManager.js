@@ -17,6 +17,7 @@ export default class EnemyManager {
     this.navmesh = undefined;
     this.groupID = undefined;
     this.totalPlayerDamage = 0;
+    this.totalZombiesKilled = 0;
 
     this.zombieNum = 1;
     this.SuperZombies = [];
@@ -54,6 +55,10 @@ export default class EnemyManager {
     });
   }
 
+  IncreaseDifficulty(){
+
+  }
+
 
   OnUpdate(deltaTime) {
     var i = 0;
@@ -61,6 +66,7 @@ export default class EnemyManager {
       if (zombie.SetupComplete && this.pathFindingEnabled && !zombie.disposed) {
         zombie.OnUpdate(deltaTime);
         this.totalPlayerDamage += zombie.PlayerDamage;
+        zombie.PlayerDamage = 0;
 
         if (zombie.isDead){ // clean up some zombie resources
           zombie.colliders.forEach((collider) => {
@@ -69,6 +75,7 @@ export default class EnemyManager {
             collider.material.dispose(); // Free material memory
           });
           zombie.disposed = true;
+          this.totalZombiesKilled++;
           continue;
         }
 
@@ -97,7 +104,6 @@ export default class EnemyManager {
       }      
       i++;
     }
-    console.log(this.totalPlayerDamage);
   }
 
   // returns true if bullet hit a zombie, false otherwise.

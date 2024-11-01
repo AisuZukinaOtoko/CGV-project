@@ -168,13 +168,13 @@ export default class StartupScene extends Scene {
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
     this.gunManager.update();
+    this.postProcessor.OnUpdate(deltaTime);
   }
 
   OnPreRender() {
     if (this.enemyManager.totalPlayerDamage > 0){
-      console.log("damage player!!!!!!", this.enemyManager.totalPlayerDamage);
       this.enemyManager.totalPlayerDamage = 0;
-      this.postProcessor.ShakeCamera(100, 3);
+      this.postProcessor.ShakeCamera(0.25, 0.05);
       this.postProcessor.PlayerDamageAnimation(200);
     }
   }
