@@ -1,3 +1,5 @@
+import { showGameCompleted } from './../../GameMenu/script.js';
+
 // gameUI.js
 export class GameUI {
   constructor(scene) {
@@ -51,7 +53,7 @@ export class GameUI {
 
           if (this.timeRemaining <= 0) {
               this.stopTimer();
-              // this.gameOver();
+              showGameCompleted();
           }
       }, 1000);
   }
