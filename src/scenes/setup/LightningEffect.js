@@ -21,7 +21,7 @@ export class LightningEffect {
         this.gainNode.gain.value = 0.1; // Set initial volume (0.0 to 1.0)
         this.gainNode.connect(this.audioContext.destination); // Connect GainNode to destination
 
-        this.loadSound('src/assets/Sounds/lightning2.wav'); // Load your sound file here
+        this.loadSound('src/assets/Sounds/lightning.wav'); // Load your sound file here
 
         this.initLightning();
     }
