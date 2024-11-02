@@ -94,12 +94,12 @@ export class EnvironmentManager {
     this.scene.add(sunLight);
 
     // Set up the flickering lamp light
-    this.lampLight = new THREE.PointLight(0xffd700, 5, 20);
-    this.lampLight.position.set(-18.2, 3.0, 8.5); 
+    this.lampLight = new THREE.PointLight(0xffedb3, 5, 20);
+    this.lampLight.position.set(-18.2, 3.05, 8.5); 
     this.lampLight.castShadow = true;
 
     const bulbGeometry = new THREE.SphereGeometry(0.1, 8, 4);
-    const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700, emissive: 0xffd700 });
+    const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffedb3, emissive: 0xffedb3 });
     const bulbMesh = new THREE.Mesh(bulbGeometry, bulbMaterial);
 
     bulbMesh.position.set(-18.2, 3.0, 8.5);
