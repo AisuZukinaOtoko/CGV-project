@@ -15,6 +15,7 @@ import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
+const canvas = document.getElementById("Main-Canvas");
 
 export default class StartupScene extends Scene {
   constructor(camera, renderer) {
@@ -32,6 +33,8 @@ export default class StartupScene extends Scene {
     this.setupEventListeners();
     this.setupSkybox();
     this.setupLightningAbovePlayer();
+
+    canvas.requestPointerLock();
   }
 
   initializeScene(camera, renderer) {

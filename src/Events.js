@@ -1,4 +1,4 @@
-const canvas = document.getElementById("Main-Canvas");
+// const canvas = document.getElementById("Main-Canvas");
 // canvas.addEventListener('contextmenu', (event) => {
 //     event.preventDefault(); // Disable the right-click menu
 // });
@@ -147,7 +147,7 @@ class EventManager {
       return;
     }
 
-    canvas.requestPointerLock();
+    // canvas.requestPointerLock();
     event.preventDefault();
 
     this.m_MouseButtons[MOUSE.ANY].m_Value = true;

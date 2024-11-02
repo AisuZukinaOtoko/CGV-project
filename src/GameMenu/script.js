@@ -99,7 +99,6 @@
     
     if (isGamePaused && gameModule) {
       // Resume the game if it's paused
-      gameModule.resumeGame();
       isGamePaused = false;
       console.log("Game resumed!");
     } else if (!gameStarted) {
@@ -125,7 +124,6 @@
     intro.style.display = "flex";
     playIntroSound(); // Play sound when showing the intro or pause menu
     if (gameModule && !isGamePaused) {
-      gameModule.pauseGame();
       isGamePaused = true;
       console.log("Game paused/showing menu.");
     }
@@ -137,7 +135,6 @@
     intro.style.display = "none"; // Hide intro if visible
     playIntroSound(); // Play sound when showing the game over screen
     if (gameModule && !isGamePaused) {
-      gameModule.pauseGame(); // Pause the game when showing game over
       isGamePaused = true;
       console.log("Game paused, showing game over screen.");
     }
@@ -148,7 +145,6 @@
     intro.style.display = "none"; // Hide intro if visible
     playIntroSound(); // Play sound when showing the game over screen
     if (gameModule && !isGamePaused) {
-      gameModule.pauseGame(); // Pause the game when showing game over
       isGamePaused = true;
       console.log("Game paused, showing game over screen.");
     }
@@ -185,11 +181,7 @@
   // Event listener for pressing 'ESC' to toggle between pause and resume
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      if (isGamePaused) {
-        startGame(); // Resume the game if it was paused
-      } else {
         showMenu(); // Pause the game if it was running
-      }
     }
   });
 

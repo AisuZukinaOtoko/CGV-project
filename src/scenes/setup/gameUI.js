@@ -25,11 +25,9 @@ export class GameUI {
       // Listen for the ESC key to toggle pause/resume
       document.addEventListener('keydown', (event) => {
           if (event.key === 'Escape') {
-              if (this.isPaused) {
-                  this.startButton.addEventListener('click', () => this.resumeTimer());
-              } else {
-                  this.pauseTimer();
-              }
+            this.pauseTimer();
+          } else {
+            this.resumeTimer();
           }
       });
   }
