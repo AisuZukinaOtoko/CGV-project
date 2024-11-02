@@ -105,9 +105,6 @@ export class EnvironmentManager {
     bulbMesh.position.set(-18.2, 3.0, 8.5);
     this.scene.add(bulbMesh);
     this.scene.add(this.lampLight);
-
-    const lightHelper = new THREE.PointLightHelper(this.lampLight, 0.5);
-    this.scene.add(lightHelper);
 }
 
 animate() {
