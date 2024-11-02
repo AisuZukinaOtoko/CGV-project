@@ -16,6 +16,9 @@ export class GameUI {
       this.timerInterval = null;
       this.currentWave = 1;
       this.isPaused = false; // Track if the game is paused
+         // Load wave sound effect
+         this.waveSound = new Audio('src/assets/Sounds/wave.mp3'); // Update the path as needed
+         this.waveSound.volume = 0.5; // Adjust the volume as needed
 
       this.startTimer();
       this.setupKeyListener(); // Set up ESC key listener
@@ -110,12 +113,33 @@ export class GameUI {
   showWaveOverlay(wave) {
       this.waveText.textContent = `Wave ${wave}`;
       this.waveOverlay.style.opacity = 1;
+        // Play the wave sound
+        this.waveSound.currentTime = 0; // Reset sound to start
+        this.waveSound.volume = 0.5;
+        this.waveSound.play();
+         // Stop the wave sound after 2 seconds
+    setTimeout(() => {
+        this.waveSound.pause();
+    }, 4000);
 
-      // Hide the overlay after 3 seconds
-      setTimeout(() => {
-          this.waveOverlay.style.opacity = 0;
-      }, 3000);
-  }
+      // Gradually fade out the wave sound after 2 seconds
+    setTimeout(() => {
+        const fadeOutInterval = setInterval(() => {
+            if (this.waveSound.volume > 0.01) {
+                this.waveSound.volume -= 0.01; // Decrease volume gradually
+            } else {
+                this.waveSound.pause();
+                this.waveSound.volume = 0.5; // Reset volume for the next wave
+                clearInterval(fadeOutInterval);
+            }
+        }, 100); // Adjust the interval time for smoothness of the fade
+    }, 0); // Start fade-out after 2 seconds
+
+    // Hide the overlay after 3 seconds
+    setTimeout(() => {
+        this.waveOverlay.style.opacity = 0;
+    }, 3000);
+}
 
   incrementKills() {
       this.kills++;
