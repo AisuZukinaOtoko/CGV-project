@@ -114,15 +114,15 @@ export class AggravatedState extends State {
         zombie.targetPos = zombie.playerPos;
         zombie.MoveToTarget();
 
-        if (zombie.noPath){
+        //if (zombie.noPath){
             //zombie.stateMachine.changeTo(IDLE);
             //return;
-        }
+        //}
 
-        if (!zombie.CanSeePlayer()){
-            zombie.stateMachine.changeTo(IDLE);
-            return;
-        }
+        //if (!zombie.CanSeePlayer()){
+        //    zombie.stateMachine.changeTo(IDLE);
+        //    return;
+        //}
 
         if (zombie.CanAttack()){
             zombie.stateMachine.changeTo(ATTACK);
@@ -157,7 +157,6 @@ export class AttackState extends State {
         const progress = currentTime / totalDuration;
 
         if (progress > 0.5 && canAttack && !zombie.attackCooldown) { // Time of attack
-            console.log("Attack");
             zombie.PlayerDamage = 40;
             zombie.attackCooldown = true;
             return;

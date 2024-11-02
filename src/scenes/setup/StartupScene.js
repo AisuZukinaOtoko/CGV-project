@@ -80,7 +80,7 @@ export default class StartupScene extends Scene {
       this.playerManager.playerObject,
       this.collisionManager
     );
-    this.enemyManager.EnablePathFinding('src/assets/Environment/chapel/Whitechapel-navmesh.glb');
+    this.enemyManager.EnablePathFinding('src/assets/Environment/chapel/navmesh1.glb');
   }
 
   setupStats() {

@@ -128,6 +128,7 @@ export default class SuperZombie extends Zombie {
         this.colliders.push(rightForeArmCollider);
 
         for (const collider of this.colliders){
+          collider.visible = false;
           scene.add(collider);
         }
 
