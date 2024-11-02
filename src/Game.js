@@ -25,7 +25,7 @@ export default class Game {
     // ---- START --> Block of code starting from 28-36 handle the pause
 
       document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" || event.key === "q" || event.key === "Q" || event.key === "e" || event.key === "E") {
+        if (event.key === "Escape") {
           this.paused = true; // Toggle pause state when ESC is pressed, show the game over menu by pressing q or Q (chnage this when health is 0)
         }
       });
@@ -50,6 +50,14 @@ export default class Game {
     requestAnimationFrame(this.Run);
     if (this.m_CurrentScene.m_RequestSceneSwitch) {
       this.StartNewScene(this.m_CurrentScene.m_SwitchScene);
+    }
+
+    if(this.m_CurrentScene.isGameOver){
+      this.m_CurrentScene.gameUI.pauseTimer();
+      this.paused = true;
+    }
+    if(this.m_CurrentScene.gameUI.timeRemaining == 0){
+      this.paused = true;
     }
 
     /* logic to pause and resume start */ 

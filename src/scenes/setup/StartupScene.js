@@ -33,6 +33,7 @@ export default class StartupScene extends Scene {
     this.setupEventListeners();
     this.setupSkybox();
     this.setupLightningAbovePlayer();
+    this.isGameOver = false;
 
     canvas.requestPointerLock();
   }
@@ -172,6 +173,10 @@ export default class StartupScene extends Scene {
     this.gunManager.updateBullets(deltaTime);
     this.gunManager.update();
     this.postProcessor.OnUpdate(deltaTime);
+
+    if(this.playerManager.isDead){
+      this.isGameOver = true;
+    }
   }
 
   OnPreRender() {
@@ -182,4 +187,5 @@ export default class StartupScene extends Scene {
       this.postProcessor.PlayerDamageAnimation(200);
     }
   }
+
 }

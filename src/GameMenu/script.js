@@ -187,21 +187,6 @@
 
   
 document.addEventListener("DOMContentLoaded", () => {
-  // Event listener for pressing 'ESC' to toggle between pause and resume
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "q" || event.key === "Q") {
-      console.log("Yes nigga");
-        showGameOver(); // Pause the game if it was running
-    }
-  });
-
-  // Event listener for pressing 'ESC' to toggle between pause and resume
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "e" || event.key === "E") {
-        showGameCompleted(); // Pause the game if it was running
-    }
-  });
-
   // Play sound initially when the DOM content is loaded (for the intro screen)
   playIntroSound();
 });
