@@ -162,7 +162,7 @@ export default class StartupScene extends Scene {
     this.playerManager.update(deltaTime);
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
-    this.gunManager.update();
+    this.gunManager.update(deltaTime);
     this.environmentManager.animate();
   }
 }

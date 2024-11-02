@@ -64,6 +64,14 @@ export class PlayerManager {
     document.addEventListener("keydown", this.handleKeyDown.bind(this));
     document.addEventListener("keyup", this.handleKeyUp.bind(this)); // Fixed event listener
     document.addEventListener("mousemove", this.handleMouseMove.bind(this));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "p" || event.key === "P") {
+        if (this.gunManager) {
+          this.gunManager.toggleModelWithAnimation();
+        }
+      }
+    });
   }
 
   handleKeyDown(event) {
