@@ -97,8 +97,11 @@ export default class EnemyManager {
             collider.geometry.dispose(); // Free geometry memory
             collider.material.dispose(); // Free material memory
           });
-          zombie.disposed = true;
           this.totalZombiesKilled++;
+          if (this.gameUI) {
+            this.gameUI.incrementKills();
+          }
+          zombie.disposed = true;
           continue;
         }
 

@@ -15,6 +15,7 @@ export class GameUI {
     this.isPaused = false; // Track if the game is paused
 
     this.spawnIntervals = [
+      245, // 3:45
       180, // 3:00
       120, // 2:00
       60, // 1:00
