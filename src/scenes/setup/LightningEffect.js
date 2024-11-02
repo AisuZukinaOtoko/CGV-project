@@ -67,7 +67,7 @@ export class LightningEffect {
         };
 
         // Create multiple lightning strikes
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 2; i++) {
             const lightningStrike = new LightningStrike(rayParams);
             const lightningMesh = new THREE.Mesh(lightningStrike, new THREE.MeshBasicMaterial({ color: 0xffffff }));
             this.lightningMeshes.push({ mesh: lightningMesh, strike: lightningStrike });
@@ -76,8 +76,8 @@ export class LightningEffect {
 
         // Create an outline effect for lightning
         const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera, this.lightningMeshes.map(l => l.mesh));
-        outlinePass.edgeStrength = 2;
-        outlinePass.edgeGlow = 2.5;
+        outlinePass.edgeStrength = 3;
+        outlinePass.edgeGlow = 3.5;
         outlinePass.edgeThickness = 1;
         outlinePass.visibleEdgeColor.set(0x00aaff);
         this.composer.addPass(outlinePass);
@@ -111,11 +111,11 @@ export class LightningEffect {
     }
 
     setPosition(position) {
-        const highAbovePosition = position.clone().add(new THREE.Vector3(0, 50, 0)); // Adjust 50 to any height you prefer
+        const highAbovePosition = position.clone().add(new THREE.Vector3(0, 50, 0)); 
     
         this.lightningMeshes.forEach(({ strike }) => {
-            strike.rayParameters.sourceOffset.copy(highAbovePosition); // Start point high above
-            strike.rayParameters.destOffset.copy(position); // End point at ground level
+            strike.rayParameters.sourceOffset.copy(highAbovePosition);
+            strike.rayParameters.destOffset.copy(position); // End point 
         });
     }
 
