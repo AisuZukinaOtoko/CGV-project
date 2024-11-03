@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import EnemyManager from "./hostiles/EnemyManager.js";
+import Difficulty from "./hostiles/Difficulty.js";
 import { CollisionManager } from "./CollisionManager.js";
 import { PlayerManager } from "./PlayerManager.js";
 import { LightningEffect } from './LightningEffect.js';
@@ -32,7 +33,7 @@ export default class StartupScene extends Scene {
     this.setupStats();
     this.setupEventListeners();
     this.setupSkybox();
-    this.setupLightningAbovePlayer();
+    this.setupLightning();
     this.isGameOver = false;
 
     canvas.requestPointerLock();
@@ -85,6 +86,7 @@ export default class StartupScene extends Scene {
       this.collisionManager
     );
     this.enemyManager.EnablePathFinding('src/assets/Environment/chapel/Whitechapel-navmesh.glb');
+    this.enemyManager.EnableEnemySpawning('src/assets/Environment/chapel/Whitechapel-spawns.glb');
   }
 
   setupStats() {
@@ -114,7 +116,7 @@ export default class StartupScene extends Scene {
     ]);
     this.m_Scene.background = texture;
   }
-  setupLightningAbovePlayer() {
+  setupLightning() {
     const playerSpawnPosition = this.playerManager.getPlayerPosition();
     const lightningPosition = playerSpawnPosition.clone().add(new THREE.Vector3(0, 2, 0));  // Offset lightning above player
 
@@ -140,7 +142,7 @@ export default class StartupScene extends Scene {
   OnUpdate(deltaTime) {
     deltaTime = Math.min(deltaTime, 0.5);
     const time = performance.now() * 0.001;  // Calculate time in seconds for a smoother effect
-    //this.lightningEffect.animate(time);
+    this.lightningEffect.animate(time);
     if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)){
       this.m_MainCamera.fov -= 1;
       if (this.m_MainCamera.fov < 30){
@@ -171,7 +173,8 @@ export default class StartupScene extends Scene {
     this.playerManager.update(deltaTime);
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
-    this.gunManager.update();
+    this.gunManager.update(deltaTime);
+    this.environmentManager.animate();
     this.postProcessor.OnUpdate(deltaTime);
 
     if(this.playerManager.isDead){
@@ -186,6 +189,7 @@ export default class StartupScene extends Scene {
       this.postProcessor.ShakeCamera(0.25, 0.05);
       this.postProcessor.PlayerDamageAnimation(200);
     }
+
   }
 
 }

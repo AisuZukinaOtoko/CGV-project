@@ -3,6 +3,37 @@ import * as THREE from "three";
 import { IDLE, WALKING, AGGRAVATED, ATTACK, INJURED, STARTLED, DEAD } from './ZombieBase';
 import { State, StateMachine, Vector3 } from 'yuka';
 
+
+
+const zombieSounds = {
+    idle: new Audio('src/assets/Sounds/zombie_idle.mp3'),
+    walking: new Audio('src/assets/Sounds/zombie_idle.mp3'),
+    aggravated: new Audio('src/assets/Sounds/zombie_idle.mp3'),
+    attack: new Audio('src/assets/Sounds/zombie_idle.mp3'),
+    injured: new Audio('src/assets/Sounds/zombie_idle.mp3'),
+    startled: new Audio('src/assets/Sounds/zombie_idle.mp3'),
+    death: new Audio('src/assets/Sounds/zombie_die.mp3')
+};
+zombieSounds.idle.loop = true;
+zombieSounds.walking.loop = true;
+zombieSounds.aggravated.loop = true;
+zombieSounds.injured.loop = true;
+
+const playZombieSound = (soundKey, volume = 1.0) => {
+    const sound = zombieSounds[soundKey];
+    if (!sound) return;
+    sound.volume = volume;
+    sound.play();
+}
+
+const stopZombieSound = (soundKey) => {
+    const sound = zombieSounds[soundKey];
+    if (!sound) return;
+    sound.pause();
+    sound.currentTime = 0;
+};
+
+
 // DO nothing until all the setup is complete
 export class InitState extends State {
     enter(zombie) {
@@ -23,6 +54,7 @@ export class IdleState extends State {
     enter(zombie) {
         zombie.BlendAction(zombie.idleAction);
         zombie.isMoving = false;
+        playZombieSound('idle', 0.3);
     }
   
     execute(zombie) {
@@ -42,14 +74,15 @@ export class IdleState extends State {
             return;
         }
 
-        if (zombie.CanSmellPlayer()){
-            zombie.mesh.rotation.y += 0.5 * zombie.speed * zombie.deltaTime;
-        }
+        // if (zombie.CanSmellPlayer()){
+        //     zombie.mesh.rotation.y += 0.5 * zombie.speed * zombie.deltaTime;
+        // }
 
         
     }
   
     exit(zombie) {
+        stopZombieSound('idle');
 
     }
 }
@@ -61,6 +94,7 @@ export class WalkingState extends State {
         zombie.speed = 1;
         zombie.isMoving = true;
         zombie.noPath = false;
+        playZombieSound('walking', 0.4);
     }
 
     execute(zombie) {
@@ -88,6 +122,8 @@ export class WalkingState extends State {
     }
 
     exit(zombie) {
+        stopZombieSound('walking');
+
 
     }
 }
@@ -98,6 +134,9 @@ export class AggravatedState extends State {
         zombie.speed = 1.5;
         zombie.isMoving = true;
         zombie.noPath = false;
+        zombie.path = undefined;
+        playZombieSound('aggravated', 0.7);
+
     }
 
     execute(zombie) {
@@ -112,17 +151,16 @@ export class AggravatedState extends State {
         }
 
         zombie.targetPos = zombie.playerPos;
-        zombie.MoveToTarget();
 
-        if (zombie.noPath){
+        //if (zombie.noPath){
             //zombie.stateMachine.changeTo(IDLE);
             //return;
-        }
+        //}
 
-        if (!zombie.CanSeePlayer()){
-            zombie.stateMachine.changeTo(IDLE);
-            return;
-        }
+        // if (!zombie.CanSeePlayer()){
+        //    zombie.stateMachine.changeTo(IDLE);
+        //    return;
+        // }
 
         if (zombie.CanAttack()){
             zombie.stateMachine.changeTo(ATTACK);
@@ -131,6 +169,7 @@ export class AggravatedState extends State {
     }
 
     exit(zombie) {
+        stopZombieSound('aggravated');
 
     }
 }
@@ -157,8 +196,8 @@ export class AttackState extends State {
         const progress = currentTime / totalDuration;
 
         if (progress > 0.5 && canAttack && !zombie.attackCooldown) { // Time of attack
-            console.log("Attack");
-            zombie.PlayerDamage = 40;
+            zombie.PlayerDamage = zombie.attackDamage;
+            playZombieSound('attack', 0.8);
             zombie.attackCooldown = true;
             return;
         }
@@ -187,6 +226,7 @@ export class InjuredState extends State {
         zombie.BlendAction(zombie.hurtCrawlAction);
         zombie.isMoving = true;
         zombie.noPath = false;
+        playZombieSound('injured', 0.5)
     }
 
     execute(zombie) {
@@ -201,6 +241,7 @@ export class InjuredState extends State {
     }
 
     exit(zombie) {
+        stopZombieSound('injured');
 
     }
 }
@@ -225,6 +266,7 @@ export class DeadState extends State {
     enter(zombie) {
         zombie.BlendAction(zombie.dieBackAction);
         zombie.isMoving = false;
+        playZombieSound('death', 0.7);
     }
 
     execute(zombie) {

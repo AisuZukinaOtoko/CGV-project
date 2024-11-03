@@ -21,12 +21,16 @@ export default class Zombie extends GameEntity {
       this.sightDistance = 30;
       this.smellDistance = 10;
       this.attackDistance = 3;
+      this.attackDamage = 40;
       this.attackCooldown = false;
       this.speed = 1;
       this.isAggravated = false;  // Placeholder for when the zombie is aggravated by the player
       this.playerDamage = 0;
       this.deltaTime = 0;
       this.isMoving = false;
+      this.path = undefined;
+      this.arrivedPathNodes = [];
+      this.pathEndNode = undefined;
       this.noPath = false; // true if no path to destination is found -> zombie to idle
       this.isDead = false; // false = still being updated. Animations etc
       this.disposed = false; // memory cleaned
@@ -36,67 +40,109 @@ export default class Zombie extends GameEntity {
         this.stateMachine.update();
     }
 
-    FollowPath(path){
-      let pathTarget;
+    PositionsClose(vec1, vec2, tolerance = 2) {
+      return vec1.distanceTo(vec2) < tolerance;
+    }
 
-      if (!path || path.length <= 0){
-        pathTarget = this.immediateDestination;
-        //return;
+    NodeVisited(node){
+      for (const checkNode of this.arrivedPathNodes){
+        if (this.PositionsClose(checkNode, node)){
+          return true;
+        }
       }
-      else {
-        pathTarget = path[0];
-        this.noPath = false;
-        this.immediateDestination = pathTarget;
-      }
+      return false;
+    }
 
+    NewPath(path){
+      //const pathClone = path.map(point => point.clone());;
+
+      const newPath = path.filter(node => !this.NodeVisited(node));
+
+      this.path = newPath;
+
+    }
+
+    FollowPath(){
+      if (!this.path || this.path.length <= 0){
+        return;
+      }
+      // let pathTarget;
+      // if (!path || path.length <= 0){
+      //   pathTarget = this.immediateDestination;
+      // }
+      // else { // path defined. path.length > 0
+      //   if (!this.path || this.path.length <= 0){
+      //     this.path = path;
+      //     this.pathEndNode = this.path[this.path.length - 1];
+      //   }
+        
+      //   // new path updates here
+      //   // if (!this.PositionsClose(this.pathEndNode, path[path.length - 1])){
+      //   //   this.path = path;
+      //   // }
+      //   //this.NewPath(path);
+        
+      //   this.path = path;
+
+      //   pathTarget = this.path[0];
+      //   this.immediateDestination = pathTarget;
+      // }      
+      let pathTarget = this.path[0];
       var distance = pathTarget.clone().sub(this.mesh.position);
-
       if (distance.lengthSq() > this.speed * 0.01){
         distance.normalize();
         this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
         this.LookAt(pathTarget);
-        //this.mesh.rotation.x = 0; // remove later
-      } else{ // move on to next node in the path
+      }
+      else { // move on to next node in the path
         this.mesh.position.copy(pathTarget);
-        if (!path){
-          this.noPath = true;
+
+        if (!this.path){
           return;
         }
-        
-        path.shift();
-        if (path.length == 0){
-          this.noPath = true;
-          return;
-        }
-        
-        pathTarget = path[0];
-        distance = pathTarget.clone().sub(this.mesh.position);
-        distance.normalize();
-        this.mesh.position.add(distance.multiplyScalar(0.5));
-        //this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
-        this.LookAt(pathTarget);
-        //console.log(distance);
+        //this.arrivedPathNodes.push(path[0].clone());
+        this.path.shift();
       }
     }
 
-    MoveToTarget(){
-      return;
-      // Get the current position of the mesh
-      const meshPosition = this.mesh.position.clone();
-      
-      // Calculate the direction vector from the mesh to the player
-      const targetDirection = new THREE.Vector3();
-      targetDirection.subVectors(this.targetPos, meshPosition).normalize();
-
-      // Calculate the target angle using Math.atan2
-      const targetYAngle = Math.atan2(targetDirection.x, targetDirection.z); // Assuming forward is along the Z-axis
-      this.mesh.rotation.y = targetYAngle;
-      
-      if (this.CanSeeTarget(this.targetPos)){
-        targetDirection.multiplyScalar(this.speed * this.deltaTime);
-        this.mesh.position.x += targetDirection.x;
-        this.mesh.position.z += targetDirection.z;
+    SetPath(path){
+      let pathTarget;
+      if (!path || path.length <= 0){
+        pathTarget = this.immediateDestination;
       }
+      else { // path defined. path.length > 0
+        if (!this.path || this.path.length <= 0){
+          this.path = path;
+          this.pathEndNode = this.path[this.path.length - 1];
+        }
+        
+        // new path updates here
+        // if (!this.PositionsClose(this.pathEndNode, path[path.length - 1])){
+        //   this.path = path;
+        // }
+        //this.NewPath(path);
+        
+        this.path = path;
+
+        pathTarget = this.path[0];
+        this.immediateDestination = pathTarget;
+      }      
+
+      // var distance = pathTarget.clone().sub(this.mesh.position);
+      // if (distance.lengthSq() > this.speed * 0.1){
+      //   distance.normalize();
+      //   this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
+      //   this.LookAt(pathTarget);
+      // }
+      // else { // move on to next node in the path
+      //   this.mesh.position.copy(pathTarget);
+
+      //   if (!this.path){
+      //     return;
+      //   }
+      //   //this.arrivedPathNodes.push(path[0].clone());
+      //   this.path.shift();
+      // }
     }
 
     LookAt(target){

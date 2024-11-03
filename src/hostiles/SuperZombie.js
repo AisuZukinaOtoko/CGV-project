@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Zombie from './ZombieBase'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Audio, AudioLoader, AudioListener } from 'three';
 
 export default class SuperZombie extends Zombie {
     constructor(scene, collidableMeshList, initialPosition = new THREE.Vector3(0, 0, 0)){
