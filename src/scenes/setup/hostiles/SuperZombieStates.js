@@ -91,7 +91,6 @@ export class IdleState extends State {
 export class WalkingState extends State {
   enter(zombie) {
     zombie.BlendAction(zombie.runAction);
-    zombie.speed = 1;
     zombie.isMoving = true;
     zombie.noPath = false;
     playZombieSound("walking", 0.4);
@@ -129,7 +128,6 @@ export class WalkingState extends State {
 export class AggravatedState extends State {
   enter(zombie) {
     zombie.BlendAction(zombie.runAction);
-    zombie.speed = 1.5;
     zombie.isMoving = true;
     zombie.noPath = false;
     zombie.path = undefined;

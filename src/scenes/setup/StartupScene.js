@@ -15,14 +15,14 @@ import { MiniMap } from "./Minimap.js";
 import { PostProcessor } from "../../PostProcessing.js";
 import Events from "../../Events.js";
 //Change this to the correct name for playground navmesh
-import navmesh from "/Environment/chapel/Whitechapel-navmesh.glb";
-//import spawns from "/Environment/chapel/Whitechapel-spawns.glb";
-import cloud_ft from "/Environment/env_maps/cloudy/bluecloud_ft.jpg";
-import cloud_bk from "/Environment/env_maps/cloudy/bluecloud_bk.jpg";
-import cloud_up from "/Environment/env_maps/cloudy/bluecloud_up.jpg";
-import cloud_dn from "/Environment/env_maps/cloudy/bluecloud_dn.jpg";
-import cloud_rt from "/Environment/env_maps/cloudy/bluecloud_rt.jpg";
-import cloud_lf from "/Environment/env_maps/cloudy/bluecloud_lf.jpg";
+import navmesh from "/Environment/playground/playground_navmesh.glb";
+import spawns from "/Environment/playground/playground-spawns.glb";
+import cloud_ft from "/Environment/env_maps/cloudy/graycloud_ft.jpg";
+import cloud_bk from "/Environment/env_maps/cloudy/graycloud_bk.jpg";
+import cloud_up from "/Environment/env_maps/cloudy/graycloud_up.jpg";
+import cloud_dn from "/Environment/env_maps/cloudy/graycloud_dn.jpg";
+import cloud_rt from "/Environment/env_maps/cloudy/graycloud_rt.jpg";
+import cloud_lf from "/Environment/env_maps/cloudy/graycloud_lf.jpg";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -40,6 +40,7 @@ export default class StartupScene extends Scene {
     this.environmentCutoffSize = 200;
     this.initializeScene(camera, renderer);
     this.gameUI = new GameUI(this.m_Scene);
+    this.currentWave = 0;
     this.setupManagers();
     this.setupStats();
     this.setupEventListeners();
@@ -102,7 +103,7 @@ export default class StartupScene extends Scene {
     this.gameUI.setEnemyManager(this.enemyManager);
 
     this.enemyManager.EnablePathFinding(navmesh);
-    //this.enemyManager.EnableEnemySpawning(spawns);
+    this.enemyManager.EnableEnemySpawning(spawns);
   }
 
   setupStats() {
@@ -163,7 +164,7 @@ export default class StartupScene extends Scene {
   }
 
   OnUpdate(deltaTime) {
-    deltaTime = Math.min(deltaTime, 0.5);
+    deltaTime = Math.min(deltaTime, 0.1);
     const time = performance.now() * 0.001; // Calculate time in seconds for a smoother effect
     this.lightningEffect.animate(time);
     if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)) {
@@ -196,6 +197,7 @@ export default class StartupScene extends Scene {
     this.m_MainCamera.updateProjectionMatrix();
     this.stats.update();
     this.gameUI.update();
+    this.UpdateDifficulty();
     this.playerManager.update(deltaTime);
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
@@ -216,5 +218,29 @@ export default class StartupScene extends Scene {
       this.postProcessor.ShakeCamera(0.25, 0.05);
       this.postProcessor.PlayerDamageAnimation(200);
     }
+  }
+
+  UpdateDifficulty(){
+    if (this.currentWave == this.gameUI.currentWave)
+      return;
+
+    switch(this.gameUI.currentWave){
+      case 1:
+        this.enemyManager.ChangeDifficulty(Difficulty.EASY);
+        break;
+      case 2:
+        this.enemyManager.ChangeDifficulty(Difficulty.NORMAL);
+        break;
+      case 3:
+        this.enemyManager.ChangeDifficulty(Difficulty.HARD);
+        break;
+      case 4:
+        this.enemyManager.ChangeDifficulty(Difficulty.IMPOSSIBLE);
+        break;
+      default:
+        break;
+    }
+
+    this.currentWave = this.gameUI.currentWave;
   }
 }

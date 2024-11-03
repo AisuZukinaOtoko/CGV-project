@@ -66,27 +66,7 @@ export default class Zombie extends GameEntity {
       if (!this.path || this.path.length <= 0){
         return;
       }
-      // let pathTarget;
-      // if (!path || path.length <= 0){
-      //   pathTarget = this.immediateDestination;
-      // }
-      // else { // path defined. path.length > 0
-      //   if (!this.path || this.path.length <= 0){
-      //     this.path = path;
-      //     this.pathEndNode = this.path[this.path.length - 1];
-      //   }
-        
-      //   // new path updates here
-      //   // if (!this.PositionsClose(this.pathEndNode, path[path.length - 1])){
-      //   //   this.path = path;
-      //   // }
-      //   //this.NewPath(path);
-        
-      //   this.path = path;
-
-      //   pathTarget = this.path[0];
-      //   this.immediateDestination = pathTarget;
-      // }      
+            
       let pathTarget = this.path[0];
       var distance = pathTarget.clone().sub(this.mesh.position);
       if (distance.lengthSq() > this.speed * 0.01){

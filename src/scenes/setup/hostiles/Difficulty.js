@@ -7,9 +7,9 @@ const Easy = {
 
 const Normal = {
     ZombieNum : 5,
-    ZombieHealth : 120,
-    ZombieSpeed : 1.2,
-    ZombieAttackDamage : 30,
+    ZombieHealth : 1200,
+    ZombieSpeed : 10.2,
+    ZombieAttackDamage : 80,
 }
 
 const Hard = {

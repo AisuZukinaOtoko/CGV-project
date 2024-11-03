@@ -110,7 +110,8 @@ export default class EnemyManager {
         this.player.position
       );
       this.SuperZombies.push(zombie);
-    } else if (currentZombieNum < this.DesiredZombieNum) {
+    } 
+    else if (currentZombieNum < this.DesiredZombieNum) {
       let position = this.zombieSpawner.GetRandomSpawn();
       const zombie = new SuperZombie(
         this.scene,
@@ -121,13 +122,12 @@ export default class EnemyManager {
       this.SuperZombies.push(zombie);
     }
 
-    this.pathFindingRefresh = 1 / this.pathfindingRefreshRate;
+    this.SpawningRefresh = 1 / this.SpawningRate;
   }
 
   OnUpdate(deltaTime) {
     this.UpdateSpawns(deltaTime);
 
-    var i = 0;
     this.pathFindingRefresh -= deltaTime;
     for (const zombie of this.SuperZombies) {
       if (zombie.SetupComplete && this.pathFindingEnabled && !zombie.disposed) {
@@ -178,19 +178,10 @@ export default class EnemyManager {
           );
 
           zombie.SetPath(path);
-
-          if (path && i == 0) {
-            // debug path viewing
-            this.pathFinderHelper.setPlayerPosition(zombiePos);
-            this.pathFinderHelper.setTargetPosition(zombieTarget);
-            this.pathFinderHelper.reset();
-            this.pathFinderHelper.setPath(path);
-          }
         }
 
         zombie.FollowPath();
       }
-      i++;
     }
 
     if (this.pathFindingRefresh < 0)

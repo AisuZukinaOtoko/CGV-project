@@ -177,6 +177,7 @@ export default class SuperZombie extends Zombie {
         ];
 
         this.colliders.forEach((collider) => scene.add(collider));
+        this.colliders.forEach((collider) => collider.visible = false);
       }
     });
   }
