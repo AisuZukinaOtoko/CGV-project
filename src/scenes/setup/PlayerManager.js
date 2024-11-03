@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import EVENTS from "../../Events.js";
+import { showGameOver } from "./../../GameMenu/script.js";
 import walkingSound from "/Sounds/walking.wav";
 
 export class PlayerManager {
@@ -8,12 +9,41 @@ export class PlayerManager {
     this.camera = camera;
     this.collisionManager = collisionManager;
     this.renderer = renderer;
+    this.isDead = false;
+
+    this.health = 100; // Initialize player health to 100%
+    this.healthBarElement = document.querySelector(".health-bar .bar");
 
     this.setupPlayer();
     this.setupCrosshair();
     this.gunManager = null;
     this.setupEventListeners();
     this.setupAudio();
+  }
+
+  takeDamage() {
+    this.health = Math.max(this.health - 10, 0); // Reduce health by 25% but do not go below 0
+    this.updateHealthBar();
+
+    if (this.health <= 0) {
+      this.handlePlayerDeath(); // Call a method when health reaches 0
+    }
+  }
+
+  // Function to update health bar width based on current health
+  updateHealthBar() {
+    const healthPercentage = `${this.health}%`; // Calculate new width as a percentage
+    if (this.healthBarElement) {
+      this.healthBarElement.style.width = healthPercentage; // Set the width of the health bar
+    }
+  }
+
+  // Handle player death when health reaches zero
+  handlePlayerDeath() {
+    console.log("Player has died!");
+    showGameOver();
+    this.isDead = true;
+    // Add any additional game-over or respawn logic here
   }
 
   setupPlayer() {
@@ -70,11 +100,19 @@ export class PlayerManager {
     document.addEventListener("keydown", this.handleKeyDown.bind(this));
     document.addEventListener("keyup", this.handleKeyUp.bind(this)); // Fixed event listener
     document.addEventListener("mousemove", this.handleMouseMove.bind(this));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "p" || event.key === "P") {
+        if (this.gunManager) {
+          this.gunManager.toggleModelWithAnimation();
+        }
+      }
+    });
   }
 
   handleKeyDown(event) {
-    if (event.key === "r") {
-      // Check for the R key to toggle running
+    if (event.key === "Shift") {
+      // Check for the Shift key to toggle running
       this.isRunning = true;
       this.movementSound.setPlaybackRate(1.5); // Increase sound playback speed when running
       this.startMovementSound(); // Start sound when running
@@ -82,7 +120,7 @@ export class PlayerManager {
   }
 
   handleKeyUp(event) {
-    if (event.key === "r") {
+    if (event.key === "Shift") {
       this.isRunning = false;
       this.movementSound.setPlaybackRate(1); // Reset speed when stopping
       this.checkStopMovementSound(); // Stop sound

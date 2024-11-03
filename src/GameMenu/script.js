@@ -1,8 +1,7 @@
-document.addEventListener("DOMContentLoaded", () => {
   const loadingDelay = 20000; // make this match the one in index,html
 
   // Select the loading screen and start button
-  const loadingScreen = document.getElementById("loading-screen");
+  const loadingScreen = document.getElementById('loading-screen');
 
   const intro = document.getElementById("intro");
   const gameOver = document.getElementById("Game-over");
@@ -32,17 +31,16 @@ document.addEventListener("DOMContentLoaded", () => {
   let isGamePaused = false; // Track the pause state
   let gameStarted = false; // Track if the game has been started at least once
   let isAudioMuted = false;
-
+  
   // Start button event listener to display the loading screen
-  startButton.addEventListener("click", function () {
+  startButton.addEventListener('click', function () {
     // Display the loading screen
-    loadingScreen.classList.remove("hidden");
+    loadingScreen.classList.remove('hidden');
 
     // Hide the loading screen after the delay and start the game
     setTimeout(() => {
-      loadingScreen.classList.add("hidden");
+      loadingScreen.classList.add('hidden');
       startGame(); // Replace with your actual game start function
-      //userInterface.resumeTimer();
     }, loadingDelay);
   });
 
@@ -89,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     audioPopup.classList.add("hidden");
   }
 
-  function restartGame() {
+  function restartGame() {  
     // Fallback: Reload the entire page if the game module isn't available or if a full refresh is needed
     location.reload();
   }
@@ -98,10 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function startGame() {
     intro.style.display = "none"; // Hide intro screen
     stopIntroSound(); // Stop the menu sound when the game starts
-
+    
     if (isGamePaused && gameModule) {
       // Resume the game if it's paused
-      gameModule.resumeGame();
       isGamePaused = false;
       console.log("Game resumed!");
     } else if (!gameStarted) {
@@ -127,35 +124,32 @@ document.addEventListener("DOMContentLoaded", () => {
     intro.style.display = "flex";
     playIntroSound(); // Play sound when showing the intro or pause menu
     if (gameModule && !isGamePaused) {
-      gameModule.pauseGame();
       isGamePaused = true;
       console.log("Game paused/showing menu.");
     }
   }
 
   // Function to show the game over screen
-  function showGameOver() {
+  export function showGameOver() {
     gameOver.classList.remove("hidden"); // Show the game over screen
     intro.style.display = "none"; // Hide intro if visible
     playIntroSound(); // Play sound when showing the game over screen
     if (gameModule && !isGamePaused) {
-      gameModule.pauseGame(); // Pause the game when showing game over
+      isGamePaused = true;
+      console.log("Game paused, showing game over screen.");
+    }
+  }
+  // Function to show the game completed screen
+  export function showGameCompleted() {
+    gameCompleted.classList.remove("hidden"); // Show the game over screen
+    intro.style.display = "none"; // Hide intro if visible
+    playIntroSound(); // Play sound when showing the game over screen
+    if (gameModule && !isGamePaused) {
       isGamePaused = true;
       console.log("Game paused, showing game over screen.");
     }
   }
 
-  // Function to show the game completed screen
-  function showGameCompleted() {
-    gameCompleted.classList.remove("hidden"); // Show the game over screen
-    intro.style.display = "none"; // Hide intro if visible
-    playIntroSound(); // Play sound when showing the game over screen
-    if (gameModule && !isGamePaused) {
-      gameModule.pauseGame(); // Pause the game when showing game over
-      isGamePaused = true;
-      console.log("Game paused, showing game over screen.");
-    }
-  }
 
   // Function to exit the game
   function exitGame() {
@@ -164,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Game exited and reset.");
     window.close();
   }
+
 
   // Event listener for starting the game when the start button is clicked resume-button
   startButton.addEventListener("click", startGame);
@@ -186,28 +181,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Event listener for pressing 'ESC' to toggle between pause and resume
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      if (isGamePaused) {
-        startGame(); // Resume the game if it was paused
-      } else {
         showMenu(); // Pause the game if it was running
-      }
     }
   });
 
-  // Event listener for pressing 'ESC' to toggle between pause and resume
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "q" || event.key === "Q") {
-      showGameOver(); // Pause the game if it was running
-    }
-  });
-
-  // Event listener for pressing 'ESC' to toggle between pause and resume
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "e" || event.key === "E") {
-      showGameCompleted(); // Pause the game if it was running
-    }
-  });
-
+  
+document.addEventListener("DOMContentLoaded", () => {
   // Play sound initially when the DOM content is loaded (for the intro screen)
   playIntroSound();
 });

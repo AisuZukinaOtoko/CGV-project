@@ -82,7 +82,7 @@ html {
   width: 50px;
   height: 50px;
   margin-right: 10px;
-  background-image: url("icons/icon-gun.png");
+  background-image: url("src/assets/icons/icon-gun.png");
   background-size: contain;
   background-repeat: no-repeat;
   position: fixed;

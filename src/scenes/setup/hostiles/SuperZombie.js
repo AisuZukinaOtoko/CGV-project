@@ -78,7 +78,7 @@ export default class SuperZombie extends Zombie {
     this.isRunning = false;
     this.SetupComplete = false;
     this.collisionManager = collisionManager;
-    this.speed = 0.5;
+    this.speed = 1.1;
     this.movementVector = new THREE.Vector3(0, 0, 1);
     this.deltaTime = null;
     this.PlayerDamage = 0;

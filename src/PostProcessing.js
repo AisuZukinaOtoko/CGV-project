@@ -38,7 +38,6 @@ export class PostProcessor {
         if (this.cameraShakeDuration < 0)
             return;
         
-        console.log("Shake camera");
         const originalPosition = this.camera.position.clone();
         const offsetX = (Math.random() - 0.5) * this.cameraShakeIntensity;
         const offsetY = (Math.random() - 0.5) * this.cameraShakeIntensity;

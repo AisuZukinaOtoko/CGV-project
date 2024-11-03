@@ -1,3 +1,5 @@
+import { showGameCompleted } from "./../../GameMenu/script.js";
+
 export class GameUI {
   constructor(scene) {
     this.scene = scene;
@@ -13,31 +15,21 @@ export class GameUI {
     this.timerInterval = null;
     this.currentWave = 1;
     this.isPaused = false; // Track if the game is paused
-
-    this.spawnIntervals = [
-      245, // 3:45
-      180, // 3:00
-      120, // 2:00
-      60, // 1:00
-      30, // 0:30
-    ];
-    this.zombiesPerSpawn = 5;
+    // Load wave sound effect
+    this.waveSound = new Audio("./Sounds/wave.mp3"); // Update the path as needed
+    this.waveSound.volume = 0.5; // Adjust the volume as needed
 
     this.startTimer();
     this.setupKeyListener(); // Set up ESC key listener
-    this.currentSpawnQueue = 0; // Track remaining zombies to spawn
-    this.spawnTimer = null; // Timer for individual zombie spawns
   }
 
   setupKeyListener() {
     // Listen for the ESC key to toggle pause/resume
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        if (this.isPaused) {
-          this.startButton.addEventListener("click", () => this.resumeTimer());
-        } else {
-          this.pauseTimer();
-        }
+        this.pauseTimer();
+      } else {
+        this.resumeTimer();
       }
     });
   }
@@ -63,36 +55,16 @@ export class GameUI {
       this.updateTimerDisplay();
       this.checkForNextWave();
 
-      if (
-        this.enemyManager &&
-        this.spawnIntervals.includes(this.timeRemaining) &&
-        this.currentSpawnQueue === 0
-      ) {
+      if (this.enemyManager && this.currentSpawnQueue === 0) {
         this.currentSpawnQueue = this.zombiesPerSpawn;
         this.startZombieWave();
       }
 
       if (this.timeRemaining <= 0) {
         this.stopTimer();
-        //this.gameOver();
+        showGameCompleted();
       }
     }, 1000);
-  }
-
-  startZombieWave() {
-    if (this.spawnTimer) {
-      clearInterval(this.spawnTimer);
-    }
-
-    this.spawnTimer = setInterval(() => {
-      if (this.currentSpawnQueue > 0) {
-        this.enemyManager.spawnAdditionalZombies(1);
-        this.currentSpawnQueue--;
-      } else {
-        clearInterval(this.spawnTimer);
-        this.spawnTimer = null;
-      }
-    }, 3000);
   }
 
   stopTimer() {
@@ -154,6 +126,27 @@ export class GameUI {
   showWaveOverlay(wave) {
     this.waveText.textContent = `Wave ${wave}`;
     this.waveOverlay.style.opacity = 1;
+    // Play the wave sound
+    this.waveSound.currentTime = 0; // Reset sound to start
+    this.waveSound.volume = 0.5;
+    this.waveSound.play();
+    // Stop the wave sound after 2 seconds
+    setTimeout(() => {
+      this.waveSound.pause();
+    }, 4000);
+
+    // Gradually fade out the wave sound after 2 seconds
+    setTimeout(() => {
+      const fadeOutInterval = setInterval(() => {
+        if (this.waveSound.volume > 0.01) {
+          this.waveSound.volume -= 0.01; // Decrease volume gradually
+        } else {
+          this.waveSound.pause();
+          this.waveSound.volume = 0.5; // Reset volume for the next wave
+          clearInterval(fadeOutInterval);
+        }
+      }, 100); // Adjust the interval time for smoothness of the fade
+    }, 0); // Start fade-out after 2 seconds
 
     // Hide the overlay after 3 seconds
     setTimeout(() => {

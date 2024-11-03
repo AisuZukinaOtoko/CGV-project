@@ -10,5 +10,12 @@ export default defineConfig({
       },
     },
   },
-  assetsInclude: ["**/*.gltf", "**/*.glb", "**/*.wav", "**/*.json", "**/*.jpg"],
+  assetsInclude: [
+    "**/*.gltf",
+    "**/*.glb",
+    "**/*.wav",
+    "**/*.mp3",
+    "**/*.json",
+    "**/*.jpg",
+  ],
 });

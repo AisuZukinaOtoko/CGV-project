@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import EnemyManager from "./hostiles/EnemyManager.js";
+import Difficulty from "./hostiles/Difficulty.js";
 import { CollisionManager } from "./CollisionManager.js";
 import { PlayerManager } from "./PlayerManager.js";
 import { LightningEffect } from "./LightningEffect.js";
@@ -13,7 +14,9 @@ import { GameUI } from "./gameUI.js";
 import { MiniMap } from "./Minimap.js";
 import { PostProcessor } from "../../PostProcessing.js";
 import Events from "../../Events.js";
+//Change this to the correct name for playground navmesh
 import navmesh from "/Environment/chapel/Whitechapel-navmesh.glb";
+//import spawns from "/Environment/chapel/Whitechapel-spawns.glb";
 import cloud_ft from "/Environment/env_maps/cloudy/bluecloud_ft.jpg";
 import cloud_bk from "/Environment/env_maps/cloudy/bluecloud_bk.jpg";
 import cloud_up from "/Environment/env_maps/cloudy/bluecloud_up.jpg";
@@ -22,6 +25,8 @@ import cloud_rt from "/Environment/env_maps/cloudy/bluecloud_rt.jpg";
 import cloud_lf from "/Environment/env_maps/cloudy/bluecloud_lf.jpg";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
+
+const canvas = document.getElementById("Main-Canvas");
 
 export default class StartupScene extends Scene {
   constructor(camera, renderer) {
@@ -40,7 +45,10 @@ export default class StartupScene extends Scene {
     this.setupEventListeners();
     this.setupSkybox();
     this.miniMap = new MiniMap(this.m_Scene, this.playerManager);
-    this.setupLightningAbovePlayer();
+    this.setupLightning();
+    this.isGameOver = false;
+
+    canvas.requestPointerLock();
   }
 
   initializeScene(camera, renderer) {
@@ -94,6 +102,7 @@ export default class StartupScene extends Scene {
     this.gameUI.setEnemyManager(this.enemyManager);
 
     this.enemyManager.EnablePathFinding(navmesh);
+    //this.enemyManager.EnableEnemySpawning(spawns);
   }
 
   setupStats() {
@@ -123,7 +132,8 @@ export default class StartupScene extends Scene {
     ]);
     this.m_Scene.background = texture;
   }
-  setupLightningAbovePlayer() {
+
+  setupLightning() {
     const playerSpawnPosition = this.playerManager.getPlayerPosition();
     const lightningPosition = playerSpawnPosition
       .clone()
@@ -155,7 +165,7 @@ export default class StartupScene extends Scene {
   OnUpdate(deltaTime) {
     deltaTime = Math.min(deltaTime, 0.5);
     const time = performance.now() * 0.001; // Calculate time in seconds for a smoother effect
-    //this.lightningEffect.animate(time);
+    this.lightningEffect.animate(time);
     if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)) {
       this.m_MainCamera.fov -= 1;
       if (this.m_MainCamera.fov < 30) {
@@ -189,14 +199,20 @@ export default class StartupScene extends Scene {
     this.playerManager.update(deltaTime);
     this.enemyManager.OnUpdate(deltaTime);
     this.gunManager.updateBullets(deltaTime);
-    this.gunManager.update();
+    this.gunManager.update(deltaTime);
     this.miniMap.update();
+    this.environmentManager.animate();
     this.postProcessor.OnUpdate(deltaTime);
+
+    if (this.playerManager.isDead) {
+      this.isGameOver = true;
+    }
   }
 
   OnPreRender() {
     if (this.enemyManager.totalPlayerDamage > 0) {
       this.enemyManager.totalPlayerDamage = 0;
+      this.playerManager.takeDamage();
       this.postProcessor.ShakeCamera(0.25, 0.05);
       this.postProcessor.PlayerDamageAnimation(200);
     }
