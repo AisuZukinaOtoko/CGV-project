@@ -1,5 +1,9 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import blaster from "/Weapon/kenney_blaster-kit/Models/blasterG.glb";
+import steve from "/player/steve.glb";
+import bullet from "/Weapon/kenney_blaster-kit/Models/foamBulletB.glb";
+import pistolSound from "/Sounds/656527__de1977__automatic-pistol.wav";
 
 export class GunManager {
   constructor(scene, camera, playerObject, collisionManager, playerManager) {
@@ -28,7 +32,7 @@ export class GunManager {
   loadModels() {
     const loader = new GLTFLoader();
     loader.load(
-      "src/assets/Weapon/kenney_blaster-kit/Models/blasterG.glb",
+      blaster,
       (gltf) => {
         this.blasterModel = gltf.scene;
         this.blasterModel.scale.set(1, 1, 1);
@@ -41,7 +45,7 @@ export class GunManager {
     );
 
     loader.load(
-      "src/assets/player/steve.glb",
+      steve,
       (gltf) => {
         this.playerModel = gltf.scene;
         this.playerModel.scale.set(1, 1, 1);
@@ -57,7 +61,7 @@ export class GunManager {
   loadFoamBullet() {
     const loader = new GLTFLoader();
     loader.load(
-      "src/assets/Weapon/kenney_blaster-kit/Models/foamBulletB.glb",
+      bullet,
       (gltf) => {
         this.foamBulletModel = gltf.scene;
         this.foamBulletModel.scale.set(6, 6, 6);
@@ -72,7 +76,7 @@ export class GunManager {
       window.webkitAudioContext)();
     this.blasterSound = null;
 
-    fetch("src/assets/Sounds/656527__de1977__automatic-pistol.wav")
+    fetch(pistolSound)
       .then((response) => response.arrayBuffer())
       .then((arrayBuffer) => this.audioContext.decodeAudioData(arrayBuffer))
       .then((audioBuffer) => {

@@ -30,6 +30,7 @@ import {
   DeadState,
 } from "./SuperZombieStates";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import zombie from "/Zombies/super.glb";
 
 const sharedGeometries = {
   head: new THREE.SphereGeometry(0.2, 8, 8),
@@ -113,7 +114,7 @@ export default class SuperZombie extends Zombie {
     // Load the zombie model and animations
     const loader = new GLTFLoader();
     loader.load(
-      "src/assets/Zombies/super.glb",
+      zombie,
       (gltf) => {
         this.mesh = gltf.scene;
         this.mesh.scale.set(1.2, 1.2, 1.2);

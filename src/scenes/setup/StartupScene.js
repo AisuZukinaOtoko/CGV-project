@@ -13,6 +13,13 @@ import { GameUI } from "./gameUI.js";
 import { MiniMap } from "./Minimap.js";
 import { PostProcessor } from "../../PostProcessing.js";
 import Events from "../../Events.js";
+import navmesh from "/Environment/chapel/Whitechapel-navmesh.glb";
+import cloud_ft from "/Environment/env_maps/cloudy/bluecloud_ft.jpg";
+import cloud_bk from "/Environment/env_maps/cloudy/bluecloud_bk.jpg";
+import cloud_up from "/Environment/env_maps/cloudy/bluecloud_up.jpg";
+import cloud_dn from "/Environment/env_maps/cloudy/bluecloud_dn.jpg";
+import cloud_rt from "/Environment/env_maps/cloudy/bluecloud_rt.jpg";
+import cloud_lf from "/Environment/env_maps/cloudy/bluecloud_lf.jpg";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -86,9 +93,7 @@ export default class StartupScene extends Scene {
 
     this.gameUI.setEnemyManager(this.enemyManager);
 
-    this.enemyManager.EnablePathFinding(
-      "src/assets/Environment/chapel/Whitechapel-navmesh.glb"
-    );
+    this.enemyManager.EnablePathFinding(navmesh);
   }
 
   setupStats() {
@@ -109,12 +114,12 @@ export default class StartupScene extends Scene {
   setupSkybox() {
     const loader = new THREE.CubeTextureLoader();
     const texture = loader.load([
-      "/src/assets/Environment/env_maps/cloudy/bluecloud_ft.jpg",
-      "/src/assets/Environment/env_maps/cloudy/bluecloud_bk.jpg",
-      "/src/assets/Environment/env_maps/cloudy/bluecloud_up.jpg",
-      "/src/assets/Environment/env_maps/cloudy/bluecloud_dn.jpg",
-      "/src/assets/Environment/env_maps/cloudy/bluecloud_rt.jpg",
-      "/src/assets/Environment/env_maps/cloudy/bluecloud_lf.jpg",
+      cloud_ft,
+      cloud_bk,
+      cloud_up,
+      cloud_dn,
+      cloud_rt,
+      cloud_lf,
     ]);
     this.m_Scene.background = texture;
   }

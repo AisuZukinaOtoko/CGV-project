@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import EVENTS from "../../Events.js";
+import walkingSound from "/Sounds/walking.wav";
 
 export class PlayerManager {
   constructor(scene, camera, collisionManager, renderer) {
@@ -46,14 +47,19 @@ export class PlayerManager {
     // Load the audio file
     this.movementSound = new THREE.Audio(this.listener);
     const audioLoader = new THREE.AudioLoader();
-    audioLoader.load("src/assets/Sounds/walking.wav", (buffer) => {
-      this.movementSound.setBuffer(buffer);
-      this.movementSound.setLoop(true); // Loop the sound
-      this.movementSound.setVolume(0.5); // Set the volume (optional)
-      console.log("Movement sound loaded"); // Check if loaded
-    }, undefined, (error) => {
-      console.error("Error loading sound: ", error);
-    });
+    audioLoader.load(
+      walkingSound,
+      (buffer) => {
+        this.movementSound.setBuffer(buffer);
+        this.movementSound.setLoop(true); // Loop the sound
+        this.movementSound.setVolume(0.5); // Set the volume (optional)
+        console.log("Movement sound loaded"); // Check if loaded
+      },
+      undefined,
+      (error) => {
+        console.error("Error loading sound: ", error);
+      }
+    );
   }
 
   setGunManager(gunManager) {
@@ -67,7 +73,8 @@ export class PlayerManager {
   }
 
   handleKeyDown(event) {
-    if (event.key === "r") { // Check for the R key to toggle running
+    if (event.key === "r") {
+      // Check for the R key to toggle running
       this.isRunning = true;
       this.movementSound.setPlaybackRate(1.5); // Increase sound playback speed when running
       this.startMovementSound(); // Start sound when running
@@ -121,15 +128,23 @@ export class PlayerManager {
     this.verticalVelocity -= this.gravity;
 
     if (moveDirection.length() > 0) {
-      moveDirection.normalize().applyEuler(new THREE.Euler(0, this.rotationY, 0));
+      moveDirection
+        .normalize()
+        .applyEuler(new THREE.Euler(0, this.rotationY, 0));
       this.startMovementSound(); // Start sound on movement
     } else {
       this.checkStopMovementSound(); // Stop sound if not moving
     }
 
     const currentSpeed = this.isRunning ? this.runSpeed : this.moveSpeed; // Use run speed if running
-    const horizontalMovement = moveDirection.multiplyScalar(currentSpeed * deltaTime);
-    const verticalMovement = new THREE.Vector3(0, this.verticalVelocity * deltaTime, 0);
+    const horizontalMovement = moveDirection.multiplyScalar(
+      currentSpeed * deltaTime
+    );
+    const verticalMovement = new THREE.Vector3(
+      0,
+      this.verticalVelocity * deltaTime,
+      0
+    );
 
     this.updatePosition(horizontalMovement, verticalMovement);
     this.checkGrounded();
@@ -137,14 +152,26 @@ export class PlayerManager {
 
   updatePosition(horizontalMovement, verticalMovement) {
     // Handle horizontal movement
-    let newPosition = this.playerObject.position.clone().add(horizontalMovement);
-    if (!this.collisionManager.checkCollision(newPosition, this.playerObject.quaternion)) {
+    let newPosition = this.playerObject.position
+      .clone()
+      .add(horizontalMovement);
+    if (
+      !this.collisionManager.checkCollision(
+        newPosition,
+        this.playerObject.quaternion
+      )
+    ) {
       this.playerObject.position.copy(newPosition);
     }
 
     // Handle vertical movement
     newPosition = this.playerObject.position.clone().add(verticalMovement);
-    if (!this.collisionManager.checkCollision(newPosition, this.playerObject.quaternion)) {
+    if (
+      !this.collisionManager.checkCollision(
+        newPosition,
+        this.playerObject.quaternion
+      )
+    ) {
       this.playerObject.position.copy(newPosition);
     } else {
       this.verticalVelocity = 0; // Reset vertical velocity upon collision
@@ -172,7 +199,9 @@ export class PlayerManager {
   }
 
   setupCrosshair() {
-    const crosshairTexture = new THREE.TextureLoader().load("src/assets/Weapon/crosshair.png");
+    const crosshairTexture = new THREE.TextureLoader().load(
+      "Weapon/crosshair.png"
+    );
     const crosshairMaterial = new THREE.SpriteMaterial({
       map: crosshairTexture,
       color: 0xffffff,

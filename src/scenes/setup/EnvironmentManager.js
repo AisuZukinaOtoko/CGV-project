@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshBVH } from "three-mesh-bvh";
+import chapel from "/Environment/chapel/Whitechapel.glb";
 
 export class EnvironmentManager {
   constructor(scene, environmentCutoffSize) {
@@ -14,7 +15,7 @@ export class EnvironmentManager {
 
   setupEnvironment() {
     new GLTFLoader().load(
-      "src/assets/Environment/chapel/Whitechapel.glb",
+      chapel,
       (gltf) => {
         const environment = gltf.scene;
         environment.scale.set(1, 1, 1);
