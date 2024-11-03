@@ -16,6 +16,7 @@ import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
+const canvas = document.getElementById("Main-Canvas");
 
 export default class StartupScene extends Scene {
   constructor(camera, renderer) {
@@ -33,6 +34,9 @@ export default class StartupScene extends Scene {
     this.setupEventListeners();
     this.setupSkybox();
     this.setupLightning();
+    this.isGameOver = false;
+
+    canvas.requestPointerLock();
   }
 
   initializeScene(camera, renderer) {
@@ -172,14 +176,20 @@ export default class StartupScene extends Scene {
     this.gunManager.update(deltaTime);
     this.environmentManager.animate();
     this.postProcessor.OnUpdate(deltaTime);
+
+    if(this.playerManager.isDead){
+      this.isGameOver = true;
+    }
   }
 
   OnPreRender() {
     if (this.enemyManager.totalPlayerDamage > 0){
       this.enemyManager.totalPlayerDamage = 0;
+      this.playerManager.takeDamage();
       this.postProcessor.ShakeCamera(0.25, 0.05);
       this.postProcessor.PlayerDamageAnimation(200);
     }
 
   }
+
 }

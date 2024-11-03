@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import EVENTS from "../../Events.js";
+import { showGameOver } from './../../GameMenu/script.js';
 
 export class PlayerManager {
   constructor(scene, camera, collisionManager, renderer) {
@@ -7,12 +8,42 @@ export class PlayerManager {
     this.camera = camera;
     this.collisionManager = collisionManager;
     this.renderer = renderer;
+    this.isDead = false;
+
+    this.health = 100; // Initialize player health to 100%
+    this.healthBarElement = document.querySelector(".health-bar .bar");
 
     this.setupPlayer();
     this.setupCrosshair();
     this.gunManager = null;
     this.setupEventListeners();
     this.setupAudio();
+  }
+
+  takeDamage() {
+    this.health = Math.max(this.health - 10, 0); // Reduce health by 25% but do not go below 0
+    this.updateHealthBar();
+
+    if (this.health <= 0) {
+
+      this.handlePlayerDeath(); // Call a method when health reaches 0
+    }
+  }
+
+  // Function to update health bar width based on current health
+  updateHealthBar() {
+    const healthPercentage = `${this.health}%`; // Calculate new width as a percentage
+    if (this.healthBarElement) {
+      this.healthBarElement.style.width = healthPercentage; // Set the width of the health bar
+    }
+  }
+
+  // Handle player death when health reaches zero
+  handlePlayerDeath() {
+    console.log("Player has died!");
+    showGameOver();
+    this.isDead = true;
+    // Add any additional game-over or respawn logic here
   }
 
   setupPlayer() {
