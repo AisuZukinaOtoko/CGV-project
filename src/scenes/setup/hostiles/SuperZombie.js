@@ -30,7 +30,7 @@ export default class SuperZombie extends Zombie {
     this.isRunning = false;
     this.SetupComplete = false;
     this.collisionManager = collisionManager;
-    this.speed = 0.5;
+    this.speed = 1.1;
     this.movementVector = new THREE.Vector3(0, 0, 1);
     this.deltaTime = null;
     this.PlayerDamage = 0;
@@ -153,6 +153,15 @@ export default class SuperZombie extends Zombie {
     this.attackAction = this.mixer.clipAction(gltf.animations[4]);
     this.runAction = this.mixer.clipAction(gltf.animations[5]);
     this.idleAction = this.mixer.clipAction(gltf.animations[6]);
+
+
+    this.dieBackAction.timeScale = this.speed;
+    this.crawlAction.timeScale = this.speed;
+    this.dieForwardAction.timeScale = this.speed;
+    this.hurtCrawlAction.timeScale = this.speed;
+    this.attackAction.timeScale = this.speed;
+    this.runAction.timeScale = this.speed;
+    this.idleAction.timeScale = this.speed;
     //this.screamAction = this.mixer.clipAction(gltf.animations[1]);
 
     this.dieBackAction.loop = THREE.LoopOnce;

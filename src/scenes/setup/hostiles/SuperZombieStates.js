@@ -42,9 +42,9 @@ export class IdleState extends State {
             return;
         }
 
-        if (zombie.CanSmellPlayer()){
-            zombie.mesh.rotation.y += 0.5 * zombie.speed * zombie.deltaTime;
-        }
+        // if (zombie.CanSmellPlayer()){
+        //     zombie.mesh.rotation.y += 0.5 * zombie.speed * zombie.deltaTime;
+        // }
 
         
     }
@@ -98,6 +98,7 @@ export class AggravatedState extends State {
         zombie.speed = 1.5;
         zombie.isMoving = true;
         zombie.noPath = false;
+        zombie.path = undefined;
     }
 
     execute(zombie) {
@@ -112,17 +113,16 @@ export class AggravatedState extends State {
         }
 
         zombie.targetPos = zombie.playerPos;
-        zombie.MoveToTarget();
 
         //if (zombie.noPath){
             //zombie.stateMachine.changeTo(IDLE);
             //return;
         //}
 
-        //if (!zombie.CanSeePlayer()){
+        // if (!zombie.CanSeePlayer()){
         //    zombie.stateMachine.changeTo(IDLE);
         //    return;
-        //}
+        // }
 
         if (zombie.CanAttack()){
             zombie.stateMachine.changeTo(ATTACK);
@@ -157,7 +157,7 @@ export class AttackState extends State {
         const progress = currentTime / totalDuration;
 
         if (progress > 0.5 && canAttack && !zombie.attackCooldown) { // Time of attack
-            zombie.PlayerDamage = 40;
+            zombie.PlayerDamage = zombie.attackDamage;
             zombie.attackCooldown = true;
             return;
         }

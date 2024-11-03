@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import EnemyManager from "./hostiles/EnemyManager.js";
+import Difficulty from "./hostiles/Difficulty.js";
 import { CollisionManager } from "./CollisionManager.js";
 import { PlayerManager } from "./PlayerManager.js";
 import { LightningEffect } from './LightningEffect.js';
@@ -80,7 +81,8 @@ export default class StartupScene extends Scene {
       this.playerManager.playerObject,
       this.collisionManager
     );
-    this.enemyManager.EnablePathFinding('src/assets/Environment/chapel/navmesh1.glb');
+    this.enemyManager.EnablePathFinding('src/assets/Environment/chapel/Whitechapel-navmesh.glb');
+    this.enemyManager.EnableEnemySpawning('src/assets/Environment/chapel/Whitechapel-spawns.glb');
   }
 
   setupStats() {
