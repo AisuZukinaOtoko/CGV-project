@@ -14,12 +14,12 @@ export default class Spawner{
         filepath,
         (gltf) => {
             const scene = gltf.scene;
+            
             scene.traverse((object) => {
                 if (object.type === "Object3D") {
                     this.spawns.push(object.position);
                 }
             });
-            
             for (let pos of this.spawns){
                 pos.y = 0;
             }

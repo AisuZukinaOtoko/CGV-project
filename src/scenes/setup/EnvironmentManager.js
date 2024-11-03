@@ -50,33 +50,36 @@ export class EnvironmentManager {
             node.material.clippingPlanes = clippingPlanes;
             node.material.clipShadows = true;
             this.setupNode(node);
-
-            if (node.name === "lamp2" || node.name === "lamp") {
+            // starts here
+            if (node.name === "low_poly_lamp_DefaultMaterial_0" || node.name === "low_poly_lamp_DefaultMaterial_0001") {
+              console.log("hello");
               const light = new THREE.PointLight(0xffedb3, 5, 20);
-              light.position.copy(node.position);
-  
+
+
               // Adjust position based on lamp name
-              if (node.name === "lamp2") {
-                light.position.y += 4;
-                light.position.x += 2.5;
-                light.position.z += 1.7;
+              if (node.name === "low_poly_lamp_DefaultMaterial_0") {
+                light.position.copy(node.position);
+                light.position.y += 7;
+                light.position.x -= 15;
+                light.position.z -= 30;
                 this.createReflector(light.position);
-              } else if (node.name === "lamp") {
+              } else if (node.name === "low_poly_lamp_DefaultMaterial_0001") {
+                light.position.copy(node.position);
                 light.position.y = 0;
-                light.position.x -= 0.25;
-                light.position.z -= 1.5;
+                light.position.x -= 17;
+                light.position.z -= 30;
               }
-  
+
               light.castShadow = true;
               this.scene.add(light);
               this.lampLights.push(light);  // Add each light to the lampLights array
-  
+
               const bulbGeometry = new THREE.SphereGeometry(0.1, 8, 4);
               const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffedb3, emissive: 0xffedb3 });
               const bulbMesh = new THREE.Mesh(bulbGeometry, bulbMaterial);
               bulbMesh.position.copy(light.position);
-              this.scene.add(bulbMesh);
             }
+            // ends here
           }
         });
         this.environmentSetup = true;
