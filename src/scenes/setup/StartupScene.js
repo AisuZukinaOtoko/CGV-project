@@ -138,7 +138,7 @@ export default class StartupScene extends Scene {
   OnUpdate(deltaTime) {
     deltaTime = Math.min(deltaTime, 0.5);
     const time = performance.now() * 0.001;  // Calculate time in seconds for a smoother effect
-    //this.lightningEffect.animate(time);
+    this.lightningEffect.animate(time);
     if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)){
       this.m_MainCamera.fov -= 1;
       if (this.m_MainCamera.fov < 30){
