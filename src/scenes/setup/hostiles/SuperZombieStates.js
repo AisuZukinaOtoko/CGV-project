@@ -9,7 +9,8 @@ const zombieSounds = {
     idle: new Audio('src/assets/Sounds/zombie_idle.mp3'),
     walking: new Audio('src/assets/Sounds/zombie_idle.mp3'),
     aggravated: new Audio('src/assets/Sounds/zombie_idle.mp3'),
-    attack: new Audio('src/assets/Sounds/zombie_idle.mp3'),
+    attack: new Audio('src/assets/Sounds/zombie_attack.mp3'),
+
     injured: new Audio('src/assets/Sounds/zombie_idle.mp3'),
     startled: new Audio('src/assets/Sounds/zombie_idle.mp3'),
     death: new Audio('src/assets/Sounds/zombie_die.mp3')
@@ -196,8 +197,8 @@ export class AttackState extends State {
         const progress = currentTime / totalDuration;
 
         if (progress > 0.5 && canAttack && !zombie.attackCooldown) { // Time of attack
+            playZombieSound('attack', 0.2);
             zombie.PlayerDamage = zombie.attackDamage;
-            playZombieSound('attack', 0.8);
             zombie.attackCooldown = true;
             return;
         }
@@ -267,6 +268,12 @@ export class DeadState extends State {
         zombie.BlendAction(zombie.dieBackAction);
         zombie.isMoving = false;
         playZombieSound('death', 0.7);
+        stopZombieSound('idle');
+        stopZombieSound('walking');
+        stopZombieSound('aggravated');
+        stopZombieSound('attack');
+        stopZombieSound('injured');
+
     }
 
     execute(zombie) {
@@ -276,7 +283,8 @@ export class DeadState extends State {
     }
 
     exit(zombie) {
-        
+
+         stopZombieSound('death');
     }
 }
 
