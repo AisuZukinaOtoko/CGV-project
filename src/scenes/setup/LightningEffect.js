@@ -21,9 +21,10 @@ export class LightningEffect {
         this.gainNode.gain.value = 0.1; // Set initial volume (0.0 to 1.0)
         this.gainNode.connect(this.audioContext.destination); // Connect GainNode to destination
 
-        this.loadSound('src/assets/Sounds/lightning2.wav'); // Load your sound file here
+        this.loadSound('src/assets/Sounds/thunder.mp3'); // Load your sound file here
 
         this.initLightning();
+        setInterval(() => this.triggerLightning(), 10000); // Strike every 10 seconds
     }
 
     async loadSound(url) {
@@ -66,7 +67,7 @@ export class LightningEffect {
         };
 
         // Create multiple lightning strikes
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 2; i++) {
             const lightningStrike = new LightningStrike(rayParams);
             const lightningMesh = new THREE.Mesh(lightningStrike, new THREE.MeshBasicMaterial({ color: 0xffffff }));
             this.lightningMeshes.push({ mesh: lightningMesh, strike: lightningStrike });
@@ -75,11 +76,25 @@ export class LightningEffect {
 
         // Create an outline effect for lightning
         const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera, this.lightningMeshes.map(l => l.mesh));
-        outlinePass.edgeStrength = 2;
-        outlinePass.edgeGlow = 2.5;
+        outlinePass.edgeStrength = 3;
+        outlinePass.edgeGlow = 3.5;
         outlinePass.edgeThickness = 1;
         outlinePass.visibleEdgeColor.set(0x00aaff);
         this.composer.addPass(outlinePass);
+    }
+
+    triggerLightning() {
+        this.lightningMeshes.forEach(({ mesh }) => {
+            mesh.visible = true;  // Make the lightning visible
+        });
+        this.playSound(); // Play the sound effect
+    
+        // Hide lightning after short delay (e.g., 200ms for flash effect)
+        setTimeout(() => {
+            this.lightningMeshes.forEach(({ mesh }) => {
+                mesh.visible = false;
+            });
+        }, 200);
     }
 
     setPositions(positions) {
@@ -96,9 +111,11 @@ export class LightningEffect {
     }
 
     setPosition(position) {
+        const highAbovePosition = position.clone().add(new THREE.Vector3(0, 50, 0)); 
+    
         this.lightningMeshes.forEach(({ strike }) => {
-            strike.rayParameters.sourceOffset.copy(position);
-            strike.rayParameters.destOffset.copy(position.clone().add(new THREE.Vector3(0, -5, 0))); // Adjust end offset as needed
+            strike.rayParameters.sourceOffset.copy(highAbovePosition);
+            strike.rayParameters.destOffset.copy(position); // End point 
         });
     }
 
@@ -106,9 +123,6 @@ export class LightningEffect {
         this.lightningMeshes.forEach(({ strike, mesh }, index) => {
             strike.update(t + index * 0.2);  // Adding offset to create staggered effect
             mesh.material.opacity = Math.random();  // Random opacity for flicker effect
-
-            // Play sound when lightning is updated
-            this.playSound();
         });
 
         this.composer.render();
