@@ -77,7 +77,7 @@ export default class EnemyManager {
 
     for (let zombie of this.SuperZombies) {
       zombie.health = desiredDifficulty.ZombieHealth;
-      zombie.speed = desiredDifficulty.ZombieSpeed;
+      zombie.SetSpeed(desiredDifficulty.ZombieSpeed);
       zombie.attackDamage = desiredDifficulty.ZombieAttackDamage;
     }
   }

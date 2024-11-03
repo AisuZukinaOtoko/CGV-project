@@ -213,8 +213,8 @@ export default class StartupScene extends Scene {
 
   OnPreRender() {
     if (this.enemyManager.totalPlayerDamage > 0) {
+      this.playerManager.takeDamage(this.enemyManager.totalPlayerDamage);
       this.enemyManager.totalPlayerDamage = 0;
-      this.playerManager.takeDamage();
       this.postProcessor.ShakeCamera(0.25, 0.05);
       this.postProcessor.PlayerDamageAnimation(200);
     }

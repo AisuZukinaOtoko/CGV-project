@@ -7,22 +7,22 @@ const Easy = {
 
 const Normal = {
     ZombieNum : 5,
-    ZombieHealth : 1200,
-    ZombieSpeed : 10.2,
+    ZombieHealth : 100,
+    ZombieSpeed : 1.6,
     ZombieAttackDamage : 80,
 }
 
 const Hard = {
     ZombieNum : 7,
     ZombieHealth : 200,
-    ZombieSpeed : 1.6,
+    ZombieSpeed : 2.0,
     ZombieAttackDamage : 70,
 }
 
 const Impossible = {
     ZombieNum : 12,
     ZombieHealth : 500,
-    ZombieSpeed : 2.5,
+    ZombieSpeed : 3.2,
     ZombieAttackDamage : 100,
 }
 

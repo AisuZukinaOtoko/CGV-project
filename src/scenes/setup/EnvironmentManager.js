@@ -159,22 +159,20 @@ export class EnvironmentManager {
     reflector.position.x += 2;
     this.scene.add(reflector);
   }
-  
-  animate() {
-    if (this.lampLight) {
-      // Set the light off occasionally (e.g., 20% chance per frame)
-      const flickerOff = Math.random() < 0.2;
 
-      if (flickerOff) {
-        this.lampLight.intensity = 0; // Turn light off
-      } else {
-        this.lampLight.intensity = 5 + Math.random() * 0.5;
-        // Play sound if lamp is flickering
-        if (this.lampLight.intensity > 0 && !this.flickerSound.paused) {
-          this.flickerSound.currentTime = 0; // Reset sound playback
+  animate() {
+    this.lampLights.forEach((light) => {
+        const flickerOff = Math.random() < 0.2;
+        if (flickerOff) {
+            light.intensity = 0; // Turn light off
+        } else {
+            light.intensity = 5 + Math.random() * 0.5;
+            // Play sound if any lamp is flickering
+            if (light.intensity > 0 && this.flickerSound.paused) {
+                this.flickerSound.currentTime = 0; // Reset sound playback
+                this.flickerSound.play();
+            }
         }
-        this.flickerSound.play(); // Play sound if the lamp is flickering
-      }
-    }
+    });
   }
 }

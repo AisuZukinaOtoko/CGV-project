@@ -188,6 +188,17 @@ export default class SuperZombie extends Zombie {
     }
   }
 
+  SetSpeed(speed){
+    this.speed = speed;
+    this.dieBackAction.timeScale = speed;
+    this.crawlAction.timeScale = speed;
+    this.dieForwardAction.timeScale = speed;
+    this.hurtCrawlAction.timeScale = speed;
+    this.attackAction.timeScale = speed;
+    this.runAction.timeScale = speed;
+    this.idleAction.timeScale = speed;
+  }
+
   setupAnimations(gltf) {
     if (!this.mesh || !gltf.animations) return;
 

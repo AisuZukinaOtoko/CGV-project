@@ -21,8 +21,9 @@ export class PlayerManager {
     this.setupAudio();
   }
 
-  takeDamage() {
-    this.health = Math.max(this.health - 10, 0); // Reduce health by 25% but do not go below 0
+  takeDamage(damage) {
+    this.health -= damage;
+    this.health = Math.max(this.health, 0); // Reduce health by 25% but do not go below 0
     this.updateHealthBar();
 
     if (this.health <= 0) {
