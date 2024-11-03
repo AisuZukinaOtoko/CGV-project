@@ -23,6 +23,10 @@ export class GunManager {
     this.blasterZoom = 1;
     this.playerModelZoom = 0.8;
     this.currentZoom = this.blasterZoom;
+
+    this.playerMixer = null;  // Animation mixer for the player
+    this.walkAction = null;   // Walking animation action
+    this.isBlasterVisible = true;
   }
 
   loadModels() {
@@ -47,11 +51,34 @@ export class GunManager {
         this.playerModel.scale.set(1, 1, 1);
         this.playerModelObject.add(this.playerModel);
         this.playerModelObject.visible = false;
+        this.playerMixer = new THREE.AnimationMixer(this.playerModel);
+        const animations = gltf.animations;
+        animations.forEach((clip, index) => {
+          console.log(`Animation ${index + 1}: ${clip.name}, Duration: ${clip.duration} seconds`);
+        });
+        this.walkAction = this.playerMixer.clipAction(animations[1]); // Walking animation
+        this.walkAction.play();
         this.updateModelPosition();
       },
       undefined,
       (error) => console.error("Error loading player model:", error)
     );
+  }
+
+  toggleModelWithAnimation() {
+    this.isBlasterVisible = !this.isBlasterVisible;
+    this.blasterObject.visible = this.isBlasterVisible;
+    this.playerModelObject.visible = !this.isBlasterVisible;
+
+    if (this.playerMixer) {
+      if (this.playerModelObject.visible) {
+        this.walkAction.reset().play(); // Start the walking animation
+      } else {
+        this.walkAction.stop(); // Stop the walking animation when the player model is hidden
+      }
+    }
+
+    this.updateCameraZoom();
   }
 
   loadFoamBullet() {
@@ -267,7 +294,12 @@ export class GunManager {
     this.playerModelBulletScale = scale;
   }
 
-  update() {
+  update(deltaTime) {
     this.updateCameraZoom();
+
+    // Update player animation mixer if the player model is visible
+    if (this.playerMixer && this.playerModelObject.visible) {
+      this.playerMixer.update(deltaTime);
+    }
   }
 }

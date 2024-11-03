@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import EVENTS from "../../Events.js";
+import { showGameOver } from './../../GameMenu/script.js';
 
 export class PlayerManager {
   constructor(scene, camera, collisionManager, renderer) {
@@ -7,6 +8,10 @@ export class PlayerManager {
     this.camera = camera;
     this.collisionManager = collisionManager;
     this.renderer = renderer;
+    this.isDead = false;
+
+    this.health = 100; // Initialize player health to 100%
+    this.healthBarElement = document.querySelector(".health-bar .bar");
 
     this.setupPlayer();
     this.setupCrosshair();
@@ -15,9 +20,35 @@ export class PlayerManager {
     this.setupAudio();
   }
 
+  takeDamage() {
+    this.health = Math.max(this.health - 10, 0); // Reduce health by 25% but do not go below 0
+    this.updateHealthBar();
+
+    if (this.health <= 0) {
+
+      this.handlePlayerDeath(); // Call a method when health reaches 0
+    }
+  }
+
+  // Function to update health bar width based on current health
+  updateHealthBar() {
+    const healthPercentage = `${this.health}%`; // Calculate new width as a percentage
+    if (this.healthBarElement) {
+      this.healthBarElement.style.width = healthPercentage; // Set the width of the health bar
+    }
+  }
+
+  // Handle player death when health reaches zero
+  handlePlayerDeath() {
+    console.log("Player has died!");
+    showGameOver();
+    this.isDead = true;
+    // Add any additional game-over or respawn logic here
+  }
+
   setupPlayer() {
     this.playerObject = new THREE.Object3D();
-    this.playerObject.position.set(0, 2, 5);
+    this.playerObject.position.set(5, 2, 5);
     this.scene.add(this.playerObject);
     this.playerObject.add(this.camera);
     this.camera.position.set(0, 0, 0);
@@ -64,6 +95,14 @@ export class PlayerManager {
     document.addEventListener("keydown", this.handleKeyDown.bind(this));
     document.addEventListener("keyup", this.handleKeyUp.bind(this)); // Fixed event listener
     document.addEventListener("mousemove", this.handleMouseMove.bind(this));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "p" || event.key === "P") {
+        if (this.gunManager) {
+          this.gunManager.toggleModelWithAnimation();
+        }
+      }
+    });
   }
 
   handleKeyDown(event) {
