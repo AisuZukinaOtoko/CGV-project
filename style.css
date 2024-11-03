@@ -137,6 +137,30 @@ html {
   );
 }
 
+#waveOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark overlay */
+  backdrop-filter: blur(8px); /* Blurred background effect */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10; /* Ensure it appears above other elements */
+}
+
+#waveText {
+  font-family: 'Rubik Wet Paint', cursive;
+  color: #FF0000; /* Bright red for visibility */
+  font-size: 4rem; /* Adjust as needed */
+  text-align: center;
+}
+
 
 /* Game-over screen */
 /* #game-over {
