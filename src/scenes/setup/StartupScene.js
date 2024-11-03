@@ -1,16 +1,17 @@
 import Scene from "../Scene.js";
-import EVENTS from "../../Events.js";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import EnemyManager from "./hostiles/EnemyManager.js";
+import Difficulty from "./hostiles/Difficulty.js";
 import { CollisionManager } from "./CollisionManager.js";
 import { PlayerManager } from "./PlayerManager.js";
 import { LightningEffect } from './LightningEffect.js';
 import { EnvironmentManager } from "./EnvironmentManager.js";
 import { GunManager } from "./GunManager.js";
 import { GameUI } from "./gameUI.js";
+import { PostProcessor } from "../../PostProcessing.js"
 import Events from "../../Events.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
@@ -22,6 +23,7 @@ export default class StartupScene extends Scene {
     this.gameUI = new GameUI(this);
     this.isGamePaused = false;  // New property to track pause state
     this.m_Scene = new THREE.Scene();
+    this.postProcessor = new PostProcessor(this.scene, renderer, camera);
     this.m_MainCamera = camera;
     this.m_Renderer = renderer;
     this.environmentCutoffSize = 200;
@@ -79,7 +81,8 @@ export default class StartupScene extends Scene {
       this.playerManager.playerObject,
       this.collisionManager
     );
-    this.enemyManager.EnablePathFinding('src/assets/Environment/polygonal_apocalyptic_urban_ruins/scene-navmesh2.glb');
+    this.enemyManager.EnablePathFinding('src/assets/Environment/chapel/Whitechapel-navmesh.glb');
+    this.enemyManager.EnableEnemySpawning('src/assets/Environment/chapel/Whitechapel-spawns.glb');
   }
 
   setupStats() {
@@ -133,8 +136,9 @@ export default class StartupScene extends Scene {
   }
 
   OnUpdate(deltaTime) {
+    deltaTime = Math.min(deltaTime, 0.5);
     const time = performance.now() * 0.001;  // Calculate time in seconds for a smoother effect
-    this.lightningEffect.animate(time);
+    //this.lightningEffect.animate(time);
     if (Events.eventHandler.IsMouseButtonHeld(Events.MOUSE.RIGHT)){
       this.m_MainCamera.fov -= 1;
       if (this.m_MainCamera.fov < 30){
@@ -156,6 +160,9 @@ export default class StartupScene extends Scene {
       this.enemyManager.BulletHitCheck(cameraWorldPosition, direction, this.m_MainCamera, 20);
     }
 
+    if (!this.environmentManager.environmentSetup)
+      return;
+
     this.m_MainCamera.updateProjectionMatrix();
     this.stats.update();
     this.gameUI.update();
@@ -164,5 +171,15 @@ export default class StartupScene extends Scene {
     this.gunManager.updateBullets(deltaTime);
     this.gunManager.update(deltaTime);
     this.environmentManager.animate();
+    this.postProcessor.OnUpdate(deltaTime);
+  }
+
+  OnPreRender() {
+    if (this.enemyManager.totalPlayerDamage > 0){
+      this.enemyManager.totalPlayerDamage = 0;
+      this.postProcessor.ShakeCamera(0.25, 0.05);
+      this.postProcessor.PlayerDamageAnimation(200);
+    }
+
   }
 }

@@ -9,14 +9,17 @@ export class EnvironmentManager {
     this.collidableMeshList = [];
     this.setupEnvironment();
     this.setupLights();
-        // Load sound
-        this.flickerSound = new Audio('src/assets/Sounds/bulb.mp3'); // Replace with your sound file path
-        this.flickerSound.volume = 0.8; // Set volume (0 to 1)
+
+    this.environmentSetup = false;
+
+    this.flickerSound = new Audio('src/assets/Sounds/bulb.mp3'); // Replace with your sound file path
+    this.flickerSound.volume = 0.8; // Set volume (0 to 1)
+
   }
 
   setupEnvironment() {
     new GLTFLoader().load(
-      "src/assets/Environment/Chapel/Whitechapel.glb",
+      "src/assets/Environment/chapel/Whitechapel.glb",
       (gltf) => {
         const environment = gltf.scene;
         environment.scale.set(1, 1, 1);
@@ -47,6 +50,7 @@ export class EnvironmentManager {
             this.setupNode(node);
           }
         });
+        this.environmentSetup = true;
       },
       undefined,
       (error) => console.error("Error loading environment:", error)
