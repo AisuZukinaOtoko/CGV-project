@@ -2,28 +2,28 @@ const Easy = {
     ZombieNum : 3,
     ZombieHealth : 50,
     ZombieSpeed : 1,
-    ZombieAttackDamage : 20,
+    ZombieAttackDamage : 10,
 }
 
 const Normal = {
     ZombieNum : 5,
     ZombieHealth : 100,
     ZombieSpeed : 1.6,
-    ZombieAttackDamage : 80,
+    ZombieAttackDamage : 15,
 }
 
 const Hard = {
     ZombieNum : 7,
     ZombieHealth : 200,
     ZombieSpeed : 2.0,
-    ZombieAttackDamage : 70,
+    ZombieAttackDamage : 20,
 }
 
 const Impossible = {
     ZombieNum : 12,
     ZombieHealth : 500,
     ZombieSpeed : 3.2,
-    ZombieAttackDamage : 100,
+    ZombieAttackDamage : 25,
 }
 
 const Difficulty = {
