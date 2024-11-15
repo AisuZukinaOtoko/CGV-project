@@ -11,60 +11,142 @@ export const DEAD = "6";
 
 export default class Zombie extends GameEntity {
     constructor(playerPos) {
-        super();
-        this.stateMachine = new StateMachine(this);
-        this.playerPos = playerPos;
-        this.targetPos = new THREE.Vector3(0, 0, 0);
-        this.health = 100;
-        this.sightDistance = 10;
-        this.smellDistance = 10;
-        this.attackDistance = 3;
-        this.speed = 1;
-        this.isAggravated = false;  // Placeholder for when the zombie is aggravated by the player
-        this.deltaTime = 0;
+      super();
+      this.stateMachine = new StateMachine(this);
+      this.playerPos = playerPos;
+      this.targetPos = new THREE.Vector3(0, 0, 0);
+      this.immediateDestination = new THREE.Vector3(0, 0, 0); // next destination on the path to the target
+      this.health = 100;
+      this.legHealth = 50;
+      this.sightDistance = 30;
+      this.smellDistance = 10;
+      this.attackDistance = 3;
+      this.attackDamage = 40;
+      this.attackCooldown = false;
+      this.speed = 1;
+      this.isAggravated = false;  // Placeholder for when the zombie is aggravated by the player
+      this.playerDamage = 0;
+      this.deltaTime = 0;
+      this.isMoving = false;
+      this.path = undefined;
+      this.arrivedPathNodes = [];
+      this.pathEndNode = undefined;
+      this.noPath = false; // true if no path to destination is found -> zombie to idle
+      this.isDead = false; // false = still being updated. Animations etc
+      this.disposed = false; // memory cleaned
     }
 
     OnUpdate(delta) {
         this.stateMachine.update();
     }
 
-    MoveToTarget(){
-      // Get the current position of the mesh
-      const meshPosition = this.mesh.position.clone();
-      
-      // Calculate the direction vector from the mesh to the player
-      const targetDirection = new THREE.Vector3();
-      targetDirection.subVectors(this.targetPos, meshPosition).normalize();
+    PositionsClose(vec1, vec2, tolerance = 2) {
+      return vec1.distanceTo(vec2) < tolerance;
+    }
 
-      // Calculate the target angle using Math.atan2
-      const targetYAngle = Math.atan2(targetDirection.x, targetDirection.z); // Assuming forward is along the Z-axis
-      this.mesh.rotation.y = targetYAngle;
-
-      // Smoothly interpolate the mesh's Y rotation towards the target angle
-      //this.mesh.rotation.y += THREE.MathUtils.euclideanDistance(this.mesh.rotation.y, targetYAngle) * this.speed * this.deltaTime * 5;
-      //const difference = this.mesh.rotation.y - targetYAngle
-      //this.mesh.rotation.y += (difference / Math.abs(difference)) * this.speed * this.deltaTime;
-      //this.mesh.rotation.y = THREE.MathUtils.lerpAngle(this.mesh.rotation.y, targetYAngle, this.speed * this.deltaTime * 5);
-
-      // const meshPosition = this.mesh.position.clone();
-      // const directionToTarget = new THREE.Vector3();
-      // directionToTarget.subVectors(this.playerPos, meshPosition).normalize();
-  
-      // // Calculate the target angle using the direction vector
-      // const targetQuaternion = new THREE.Quaternion();
-      // targetQuaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), directionToTarget);
-  
-      // const currentQuaternion = this.mesh.quaternion.clone();
-      // const newQuaternion = new THREE.Quaternion();
-      // newQuaternion.slerpQuaternions(currentQuaternion, targetQuaternion, 0.5 * this.deltaTime);
-
-      // this.mesh.quaternion.copy(newQuaternion);
-
-      if (this.CanSeeTarget(this.targetPos)){
-        targetDirection.multiplyScalar(this.speed * this.deltaTime);
-        this.mesh.position.x += targetDirection.x;
-        this.mesh.position.z += targetDirection.z;
+    NodeVisited(node){
+      for (const checkNode of this.arrivedPathNodes){
+        if (this.PositionsClose(checkNode, node)){
+          return true;
+        }
       }
+      return false;
+    }
+
+    NewPath(path){
+      //const pathClone = path.map(point => point.clone());;
+
+      const newPath = path.filter(node => !this.NodeVisited(node));
+
+      this.path = newPath;
+
+    }
+
+    FollowPath(){
+      if (!this.path || this.path.length <= 0){
+        return;
+      }
+      // let pathTarget;
+      // if (!path || path.length <= 0){
+      //   pathTarget = this.immediateDestination;
+      // }
+      // else { // path defined. path.length > 0
+      //   if (!this.path || this.path.length <= 0){
+      //     this.path = path;
+      //     this.pathEndNode = this.path[this.path.length - 1];
+      //   }
+        
+      //   // new path updates here
+      //   // if (!this.PositionsClose(this.pathEndNode, path[path.length - 1])){
+      //   //   this.path = path;
+      //   // }
+      //   //this.NewPath(path);
+        
+      //   this.path = path;
+
+      //   pathTarget = this.path[0];
+      //   this.immediateDestination = pathTarget;
+      // }      
+      let pathTarget = this.path[0];
+      var distance = pathTarget.clone().sub(this.mesh.position);
+      if (distance.lengthSq() > this.speed * 0.01){
+        distance.normalize();
+        this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
+        this.LookAt(pathTarget);
+      }
+      else { // move on to next node in the path
+        this.mesh.position.copy(pathTarget);
+
+        if (!this.path){
+          return;
+        }
+        //this.arrivedPathNodes.push(path[0].clone());
+        this.path.shift();
+      }
+    }
+
+    SetPath(path){
+      let pathTarget;
+      if (!path || path.length <= 0){
+        pathTarget = this.immediateDestination;
+      }
+      else { // path defined. path.length > 0
+        if (!this.path || this.path.length <= 0){
+          this.path = path;
+          this.pathEndNode = this.path[this.path.length - 1];
+        }
+        
+        // new path updates here
+        // if (!this.PositionsClose(this.pathEndNode, path[path.length - 1])){
+        //   this.path = path;
+        // }
+        //this.NewPath(path);
+        
+        this.path = path;
+
+        pathTarget = this.path[0];
+        this.immediateDestination = pathTarget;
+      }      
+
+      // var distance = pathTarget.clone().sub(this.mesh.position);
+      // if (distance.lengthSq() > this.speed * 0.1){
+      //   distance.normalize();
+      //   this.mesh.position.add(distance.multiplyScalar(this.speed * this.deltaTime));
+      //   this.LookAt(pathTarget);
+      // }
+      // else { // move on to next node in the path
+      //   this.mesh.position.copy(pathTarget);
+
+      //   if (!this.path){
+      //     return;
+      //   }
+      //   //this.arrivedPathNodes.push(path[0].clone());
+      //   this.path.shift();
+      // }
+    }
+
+    LookAt(target){
+      this.mesh.lookAt(target);
     }
 
     // Vector 3 target

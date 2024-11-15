@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import EVENTS from "../../Events.js";
+import { showGameOver } from './../../GameMenu/script.js';
 
 export class PlayerManager {
   constructor(scene, camera, collisionManager, renderer) {
@@ -7,18 +8,51 @@ export class PlayerManager {
     this.camera = camera;
     this.collisionManager = collisionManager;
     this.renderer = renderer;
+    this.isDead = false;
+
+    this.health = 100; // Initialize player health to 100%
+    this.healthBarElement = document.querySelector(".health-bar .bar");
+
     this.setupPlayer();
     this.setupCrosshair();
     this.gunManager = null;
     this.setupEventListeners();
+    this.setupAudio();
+  }
+
+  takeDamage() {
+    this.health = Math.max(this.health - 10, 0); // Reduce health by 25% but do not go below 0
+    this.updateHealthBar();
+
+    if (this.health <= 0) {
+
+      this.handlePlayerDeath(); // Call a method when health reaches 0
+    }
+  }
+
+  // Function to update health bar width based on current health
+  updateHealthBar() {
+    const healthPercentage = `${this.health}%`; // Calculate new width as a percentage
+    if (this.healthBarElement) {
+      this.healthBarElement.style.width = healthPercentage; // Set the width of the health bar
+    }
+  }
+
+  // Handle player death when health reaches zero
+  handlePlayerDeath() {
+    console.log("Player has died!");
+    showGameOver();
+    this.isDead = true;
+    // Add any additional game-over or respawn logic here
   }
 
   setupPlayer() {
     this.playerObject = new THREE.Object3D();
-    this.playerObject.position.set(0, 2, 5);
+    this.playerObject.position.set(5, 2, 5);
     this.scene.add(this.playerObject);
     this.playerObject.add(this.camera);
     this.camera.position.set(0, 0, 0);
+
     this.rotationY = 0;
     this.rotationX = 0;
     this.mouseSensitivity = 0.002;
@@ -26,10 +60,31 @@ export class PlayerManager {
     this.isGrounded = true;
     this.jumpStrength = 12;
     this.gravity = 0.55;
-    this.moveSpeed = 8;
+    this.moveSpeed = 8; // Walking speed
+    this.runSpeed = 12; // Running speed
     this.playerHeight = 2;
     this.playerRadius = 0.5;
     this.raycaster = new THREE.Raycaster();
+    this.isMoving = false; // Track movement state
+    this.isRunning = false; // Track running state
+  }
+
+  setupAudio() {
+    // Create an audio listener and add it to the camera
+    this.listener = new THREE.AudioListener();
+    this.camera.add(this.listener);
+
+    // Load the audio file
+    this.movementSound = new THREE.Audio(this.listener);
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load("src/assets/Sounds/walking.wav", (buffer) => {
+      this.movementSound.setBuffer(buffer);
+      this.movementSound.setLoop(true); // Loop the sound
+      this.movementSound.setVolume(0.5); // Set the volume (optional)
+      console.log("Movement sound loaded"); // Check if loaded
+    }, undefined, (error) => {
+      console.error("Error loading sound: ", error);
+    });
   }
 
   setGunManager(gunManager) {
@@ -38,11 +93,31 @@ export class PlayerManager {
 
   setupEventListeners() {
     document.addEventListener("keydown", this.handleKeyDown.bind(this));
+    document.addEventListener("keyup", this.handleKeyUp.bind(this)); // Fixed event listener
+    document.addEventListener("mousemove", this.handleMouseMove.bind(this));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "p" || event.key === "P") {
+        if (this.gunManager) {
+          this.gunManager.toggleModelWithAnimation();
+        }
+      }
+    });
   }
 
   handleKeyDown(event) {
-    if (event.key === "p") {
-      this.gunManager.toggleModel();
+    if (event.key === "r") { // Check for the R key to toggle running
+      this.isRunning = true;
+      this.movementSound.setPlaybackRate(1.5); // Increase sound playback speed when running
+      this.startMovementSound(); // Start sound when running
+    }
+  }
+
+  handleKeyUp(event) {
+    if (event.key === "r") {
+      this.isRunning = false;
+      this.movementSound.setPlaybackRate(1); // Reset speed when stopping
+      this.checkStopMovementSound(); // Stop sound
     }
   }
 
@@ -85,29 +160,33 @@ export class PlayerManager {
     this.verticalVelocity -= this.gravity;
 
     if (moveDirection.length() > 0) {
-      moveDirection
-        .normalize()
-        .applyEuler(new THREE.Euler(0, this.rotationY, 0));
+      moveDirection.normalize().applyEuler(new THREE.Euler(0, this.rotationY, 0));
+      this.startMovementSound(); // Start sound on movement
+    } else {
+      this.checkStopMovementSound(); // Stop sound if not moving
     }
 
-    const horizontalMovement = moveDirection.multiplyScalar(this.moveSpeed);
-    const verticalMovement = new THREE.Vector3(0, this.verticalVelocity, 0);
+    const currentSpeed = this.isRunning ? this.runSpeed : this.moveSpeed; // Use run speed if running
+    const horizontalMovement = moveDirection.multiplyScalar(currentSpeed * deltaTime);
+    const verticalMovement = new THREE.Vector3(0, this.verticalVelocity * deltaTime, 0);
 
-    this.updatePosition(horizontalMovement, verticalMovement, deltaTime);
+    this.updatePosition(horizontalMovement, verticalMovement);
     this.checkGrounded();
   }
 
-  updatePosition(horizontalMovement, verticalMovement, deltaTime) {
-    let newPosition = this.playerObject.position.clone().add(horizontalMovement.multiplyScalar(deltaTime));
+  updatePosition(horizontalMovement, verticalMovement) {
+    // Handle horizontal movement
+    let newPosition = this.playerObject.position.clone().add(horizontalMovement);
     if (!this.collisionManager.checkCollision(newPosition, this.playerObject.quaternion)) {
       this.playerObject.position.copy(newPosition);
     }
 
-    newPosition = this.playerObject.position.clone().add(verticalMovement.multiplyScalar(deltaTime));
+    // Handle vertical movement
+    newPosition = this.playerObject.position.clone().add(verticalMovement);
     if (!this.collisionManager.checkCollision(newPosition, this.playerObject.quaternion)) {
       this.playerObject.position.copy(newPosition);
     } else {
-      this.verticalVelocity = 0;
+      this.verticalVelocity = 0; // Reset vertical velocity upon collision
     }
   }
 
@@ -132,9 +211,7 @@ export class PlayerManager {
   }
 
   setupCrosshair() {
-    const crosshairTexture = new THREE.TextureLoader().load(
-      "src/assets/Weapon/crosshair.png"
-    );
+    const crosshairTexture = new THREE.TextureLoader().load("src/assets/Weapon/crosshair.png");
     const crosshairMaterial = new THREE.SpriteMaterial({
       map: crosshairTexture,
       color: 0xffffff,
@@ -165,5 +242,24 @@ export class PlayerManager {
     } else {
       this.crosshair.position.set(-0.005, -0.02, -1);
     }
+  }
+
+  startMovementSound() {
+    if (!this.movementSound.isPlaying) {
+      this.movementSound.play();
+    }
+  }
+
+  checkStopMovementSound() {
+    if (this.movementSound.isPlaying) {
+      this.movementSound.pause(); // Pause or stop as needed
+    }
+  }
+
+  destroy() {
+    document.removeEventListener("keydown", this.handleKeyDown.bind(this));
+    document.removeEventListener("keyup", this.handleKeyUp.bind(this));
+    document.removeEventListener("mousemove", this.handleMouseMove.bind(this));
+    // Additional cleanup logic if necessary
   }
 }

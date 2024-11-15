@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import StartScene from "./scenes/setup/StartupScene.js";
-
 export default class Game {
   constructor() {
     this.m_MainCamera = new THREE.PerspectiveCamera(
@@ -27,7 +26,7 @@ export default class Game {
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
-          this.paused = true; // Toggle pause state when ESC is pressed
+          this.paused = true; // Toggle pause state when ESC is pressed, show the game over menu by pressing q or Q (chnage this when health is 0)
         }
       });
 
@@ -53,11 +52,20 @@ export default class Game {
       this.StartNewScene(this.m_CurrentScene.m_SwitchScene);
     }
 
+    if(this.m_CurrentScene.isGameOver){
+      this.m_CurrentScene.gameUI.pauseTimer();
+      this.paused = true;
+    }
+    if(this.m_CurrentScene.gameUI.timeRemaining == 0){
+      this.paused = true;
+    }
+
     /* logic to pause and resume start */ 
 
       let delta;
 
       if (this.paused){
+        delta = this.m_Clock.getDelta();
         delta = 0;
         return;
       }else{

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import Collider, { HEAD, HAND, TORSO, LEFTLEGDOWN, RIGHTLEGDOWN, LEFTLEGUP, RIGHTLEGUP } from "./ZombieCollider";
 import Zombie from "./ZombieBase";
 import { IDLE, WALKING, AGGRAVATED, ATTACK, INJURED, STARTLED, DEAD } from './ZombieBase';
 import { GameEntity, State, StateMachine, Vector3 } from 'yuka';
@@ -29,10 +30,27 @@ export default class SuperZombie extends Zombie {
     this.isRunning = false;
     this.SetupComplete = false;
     this.collisionManager = collisionManager;
-    this.speed = 0.5;
+    this.speed = 1.1;
     this.movementVector = new THREE.Vector3(0, 0, 1);
     this.deltaTime = null;
     this.PlayerDamage = 0;
+
+    this.colliders = [];
+    this.BoneColliders = [];
+    this.headBone;
+    this.spineBone;
+    this.leftLegUpBone;
+    this.leftLegDownBone;
+    this.rightLegUpBone;
+    this.rightLegDownBone;
+    this.rightForeArmBone;
+    this.headCollider;
+    this.spineCollider;
+    this.leftLegUpCollider;
+    this.rightLegUpCollider;
+    this.leftLegDownCollider;
+    this.rightLegDownCollider;
+    this.rightForeArmCollider;
 
     // zombie state setup
     this.stateMachine.add(10000, new InitState());
@@ -54,10 +72,7 @@ export default class SuperZombie extends Zombie {
         this.mesh.scale.set(1.2, 1.2, 1.2);
         this.mesh.position.copy(initialPosition);
 
-        // Create a more precise collision shape
-        this.createCollisionShape();
-
-        // Set up animations
+        this.CreateSkeletalColliders(scene);
         this.setupAnimations(gltf);
 
         scene.add(this.mesh);
@@ -73,65 +88,52 @@ export default class SuperZombie extends Zombie {
     );
   }
 
-  createCollisionShape() {
-    // Body dimensions
-    const bodyRadius = 0.3; // Adjust based on your zombie's actual width
-    const bodyHeight = 1.4; // Adjust based on your zombie's actual height
+  CreateSkeletalColliders(scene){
+    this.mesh.traverse((child) => {
+      if (child.isSkinnedMesh) {
+        const skeleton = child.skeleton;
+        this.headBone = skeleton.bones.find((bone) => bone.name === "mixamorigHead");
+        this.spineBone = skeleton.bones.find((bone) => bone.name === "mixamorigSpine1");
+        this.leftLegDownBone = skeleton.bones.find((bone) => bone.name === "mixamorigLeftLeg");
+        this.leftLegUpBone = skeleton.bones.find((bone) => bone.name === "mixamorigLeftUpLeg");
+        this.rightLegDownBone = skeleton.bones.find((bone) => bone.name === "mixamorigRightLeg");
+        this.rightLegUpBone = skeleton.bones.find((bone) => bone.name === "mixamorigRightUpLeg");
+        this.rightForeArmBone = skeleton.bones.find((bone) => bone.name === "mixamorigRightHandIndex2");
 
-    // Head dimensions
-    const headRadius = 0.2; // Adjust based on your zombie's head size
+        const colliderMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5, wireframe: true });
+        // Head collider
+        const headGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+        const headCollider = new Collider(headGeometry, colliderMaterial, HEAD);
+        this.colliders.push(headCollider);
 
-    // Create body cylinder
-    const bodyGeometry = new THREE.CylinderGeometry(
-      bodyRadius,
-      bodyRadius,
-      bodyHeight,
-      8
-    );
-    const bodyMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.5,
-      wireframe: true,
+        // Body collider
+        const bodyGeometry = new THREE.BoxGeometry(0.5, 1, 0.3);
+        const spineCollider = new Collider(bodyGeometry, colliderMaterial, TORSO);
+        this.colliders.push(spineCollider);
+
+        // Leg Colliders
+        const legGeometry = new THREE.BoxGeometry(0.25, 0.5, 0.25);
+        const leftLegUpCollider = new Collider(legGeometry, colliderMaterial, LEFTLEGUP);
+        const rightLegUpCollider = new Collider(legGeometry, colliderMaterial, RIGHTLEGUP);
+        const leftLegDownCollider = new Collider(legGeometry, colliderMaterial, LEFTLEGDOWN);
+        const rightLegDownCollider = new Collider(legGeometry, colliderMaterial, RIGHTLEGDOWN);
+        this.colliders.push(leftLegUpCollider);
+        this.colliders.push(rightLegUpCollider);
+        this.colliders.push(leftLegDownCollider);
+        this.colliders.push(rightLegDownCollider);
+
+        // ForeArm Collider
+        const armGeometry = new THREE.SphereGeometry(0.13, 8, 8);
+        const rightForeArmCollider = new Collider(armGeometry, colliderMaterial, HAND);
+        this.colliders.push(rightForeArmCollider);
+
+        for (const collider of this.colliders){
+          collider.visible = false;
+          scene.add(collider);
+        }
+
+      }
     });
-    const bodyCollider = new THREE.Mesh(bodyGeometry, bodyMaterial);
-
-    // Create head sphere
-    const headGeometry = new THREE.SphereGeometry(headRadius, 8, 8);
-    const headMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.5,
-      wireframe: true,
-    });
-    const headCollider = new THREE.Mesh(headGeometry, headMaterial);
-
-    // Position colliders
-    bodyCollider.position.set(0, bodyHeight / 2, 0); // Center of the body
-    headCollider.position.set(0, bodyHeight + headRadius, 0); // Top of the body
-
-    // Create a group to hold both colliders
-    this.collisionShape = new THREE.Group();
-    this.collisionShape.add(bodyCollider);
-    this.collisionShape.add(headCollider);
-
-    // Position the collision shape relative to the mesh
-    this.collisionShape.position.set(0, 0, 0); // Center it on the mesh
-    this.mesh.add(this.collisionShape);
-
-    if (
-      this.collisionManager &&
-      typeof this.collisionManager.addCollidableObject === "function"
-    ) {
-      this.collisionManager.addCollidableObject(this.collisionShape);
-    } else {
-      console.warn(
-        "CollisionManager is not properly initialized or lacks addCollidableObject method"
-      );
-    }
-
-    // Initially hide the collision shape
-    this.collisionShape.visible = true;
   }
 
   toggleCollisionShapeVisibility(visible) {
@@ -151,7 +153,21 @@ export default class SuperZombie extends Zombie {
     this.attackAction = this.mixer.clipAction(gltf.animations[4]);
     this.runAction = this.mixer.clipAction(gltf.animations[5]);
     this.idleAction = this.mixer.clipAction(gltf.animations[6]);
+
+
+    this.dieBackAction.timeScale = this.speed;
+    this.crawlAction.timeScale = this.speed;
+    this.dieForwardAction.timeScale = this.speed;
+    this.hurtCrawlAction.timeScale = this.speed;
+    this.attackAction.timeScale = this.speed;
+    this.runAction.timeScale = this.speed;
+    this.idleAction.timeScale = this.speed;
     //this.screamAction = this.mixer.clipAction(gltf.animations[1]);
+
+    this.dieBackAction.loop = THREE.LoopOnce;
+    this.dieForwardAction.loop = THREE.LoopOnce;
+    this.dieBackAction.clampWhenFinished = true;
+    this.dieForwardAction.clampWhenFinished = true;
 
     // Adjust run animation speed to match desired movement speed
     //const runSpeed = this.speed / this.movementVector.length();
@@ -168,40 +184,85 @@ export default class SuperZombie extends Zombie {
     }
     
     this.stateMachine.update();
-
-    // if (this.isRunning && !this.checkCollision()) {
-    //   const movement = this.movementVector
-    //     .clone()
-    //     .multiplyScalar(this.speed * deltaTime);
-    //   this.mesh.position.add(movement);
-    // }
+    this.UpdateColliders();
   }
 
-  checkCollision() {
-    if (
-      this.collisionManager &&
-      typeof this.collisionManager.checkCollision === "function"
-    ) {
-      return this.collisionManager.checkCollision(
-        this.mesh.position,
-        this.mesh.quaternion
-      );
-    } else {
-      console.warn(
-        "CollisionManager or checkCollision method is not properly initialized"
-      );
-      return false; // Assume no collision if the method is not available
+  UpdateColliders(){
+    for (let collider of this.colliders){
+      switch (collider.type){
+        case HEAD:
+          collider.position.copy(this.headBone.getWorldPosition(new THREE.Vector3()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage * 3;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case TORSO:
+          collider.quaternion.copy(this.spineBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.position.copy(this.spineBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0, 0)));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage * 1.5;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case HAND:
+          collider.position.copy(this.rightForeArmBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0, 0)));
+          collider.quaternion.copy(this.rightForeArmBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          break;
+
+        case LEFTLEGUP:
+          collider.position.copy(this.leftLegUpBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, 0.1)));
+          collider.quaternion.copy(this.leftLegUpBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage * 0.8;
+            this.legHealth -= collider.bulletDamage;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case LEFTLEGDOWN:
+          collider.position.copy(this.leftLegDownBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, -0.05)));
+          collider.quaternion.copy(this.leftLegDownBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage;
+            this.legHealth -= collider.bulletDamage * 1.3;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case RIGHTLEGUP:
+          collider.position.copy(this.rightLegUpBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, 0.1)));
+          collider.quaternion.copy(this.rightLegUpBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage * 0.8;
+            this.legHealth -= collider.bulletDamage;
+            collider.bulletHit = false;
+          }
+          break;
+
+        case RIGHTLEGDOWN:
+          collider.position.copy(this.rightLegDownBone.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.2, -0.05)));
+          collider.quaternion.copy(this.rightLegDownBone.getWorldQuaternion(new THREE.Quaternion()));
+          collider.updateMatrixWorld();
+          if (collider.bulletHit){
+            this.health -= collider.bulletDamage;
+            this.legHealth -= collider.bulletDamage * 1.3;
+            collider.bulletHit = false;
+          }
+          break;
+
+        default:
+          break;
+      }
     }
-  }
-
-  checkCollisionWithBullet(bullet) {
-    // Implement precise collision detection with bullets
-    // This might involve raycasting or checking intersection with the convex hull
-    // For simplicity, we'll use a sphere collision for now
-    const zombiePosition = new THREE.Vector3();
-    this.mesh.getWorldPosition(zombiePosition);
-    const distance = zombiePosition.distanceTo(bullet.position);
-    return distance < 1; // Adjust the collision radius as needed
   }
 
   ResetAllActions() {
@@ -213,5 +274,20 @@ export default class SuperZombie extends Zombie {
     this.dieForwardAction.stop();
     this.dieBackAction.stop();
     this.runAction.stop();
+  }
+
+  BlendAction(newAction){
+    const currentActions = this.mixer._actions;
+
+    // Fade out all current actions
+    currentActions.forEach((action) => {
+        if (action.isRunning()) {
+            action.fadeOut(0.3);
+        }
+    });
+
+    newAction.reset();
+    newAction.fadeIn(0.3);
+    newAction.play();
   }
 }
